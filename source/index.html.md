@@ -199,7 +199,7 @@ The APIs come in two flavors. Some APIs are simple and do not require access to 
 
 We refer to any **apparel**, **accessory**, or **shoes** as a **product** in the table below. A product in a catalog is represented as a json object with fields specified below. Ingesting the catalog means uploading these json files for all products in the catalog via an API call.
 
-Try to populate as much information available for each product into these fields in the json document. Except for the fields in bold (**id**, **name** (for natural language search), **images**(for visual search and visual browse)) all of these are optional. However the the performance of the natural language search is heavily dependent on the richness of these structured fields and is recommended that you provide as much information as possible.
+Try to populate as much information available for each product into these fields in the json document. Except for the fields in bold (**id**, **gender**, **name** (for natural language search), **images**(for visual search and visual browse)) all of these are optional. However the the performance of the natural language search is heavily dependent on the richness of these structured fields and is recommended that you provide as much information as possible.
 
 field | type | description 
 --------- | ------- | ---------- 
@@ -211,7 +211,7 @@ out_of_stock | string | Can either be `yes` or `no`. This is the field that need
 **name** | string | The name of the product. This is generally a free text brief description of the product.
 category | string | The product category.
 taxonomy | string | The complete product taxonomy if known, separated via `;`.
-gender | string | The gender for which the product is intended for, can be `male`, `female` or `unisex`.
+**gender** | string | The gender for which the product is intended for, can be `male`, `female` or `unisex`.
 age_group | list string | The age group for which the product is intended for. Some suggested tags : `baby`, `kid`, `teenager`, `adult`.
 **images** | list of dict | A list of images available for the product with `image_id` as the key and the following fields in the dict. 
 | | image_id | The image id.

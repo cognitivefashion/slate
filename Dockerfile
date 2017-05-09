@@ -7,3 +7,5 @@ RUN apt-get update && apt-get install -y nodejs \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 CMD ["bundle", "exec", "middleman", "server", "--watcher-force-polling"]
+
+# docker run --rm -v $PWD:/usr/src/app/source -w /usr/src/app/source slate_app bundle exec middleman build --clean
