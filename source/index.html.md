@@ -850,7 +850,8 @@ print response.status_code
 print response.json()
 
 # Get more info about the relevant results
-for id in response.json()['ids']:
+for product in response.json()['products']:
+    id = product['id']
     api_endpoint = '/v1/catalog/%s/products/%s'%(catalog_name,id)
     url = urljoin(api_gateway_url,api_endpoint)
     response = requests.get(url,headers=headers)
@@ -862,13 +863,15 @@ for id in response.json()['ids']:
 ```json
 {
  "time_ms": "18.14",
- "ids": [
-  "20DRA16FWCWHL9015309",
-  "20DRA16FWCWPP9014709"
- ],
- "backoff_number": [
-  0,
-  0
+ "products": [
+  {
+   "id": "20DRA16FWCWHL9015309",
+   "backoff_number": 0
+  },
+  {
+   "id": "20DRA16FWCWPP9014709",
+   "backoff_number": 0
+  }
  ]
 }
 ```
@@ -893,8 +896,9 @@ max_number_of_backoffs | query | The maximum number of backoffs to use if there 
 Parameter |  Description
 --------- |  -----------
 time_ms |  The time taken in milliseconds.
-ids | A list of ids in the product catalog that are relevant to the provided query. 
-backoff_number | A list of integers specifying if backoff was used for retrieving this id. (0 corresponds to no backoff)
+**products** | A sorted list of products in the catalog relevant to the query.
+id | The id of the product.
+backoff_number | An integer specifying if backoff was used for retrieving this result. (0 corresponds to no backoff, 1 corresponds to backoff once and so on)
 
 ## Get elasticsearch queries
 
