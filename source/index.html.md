@@ -7,6 +7,7 @@ language_tabs:
 
 toc_footers:
   - <a href='https://www.ibm.com/us-en/marketplace/8075'>Sign up for an API key</a>
+  - <a href='https://github.com/cognitivefashion/cf-sdk-python'>Python SDK</a>
   - <a href='https://www.ibm.com/us-en/marketplace/8075'>Cognitive Fashion site</a>
 
 includes:
@@ -18,6 +19,8 @@ search: true
 # IBM Research Cognitive Fashion 
 
 The [IBM Research Cognitive Fashion](https://www.ibm.com/us-en/marketplace/8075) project aims to build a suite of APIs for the fashion industry in order to enable an engaging shopping experience, primarily leveraging natural language and image understanding technologies together with other cognitive capabilities. Developers/in-house IT team can use these APIs to build their own applications. Central to this is a curated domain specific taxonomy/knowledge graph, fashion related content and text/image annotators tuned to the domain of fashion. 
+
+[Python SDK](https://github.com/cognitivefashion/cf-sdk-python)
 
 <aside class="notice">
 <b>IBM fashion taxonomy</b> is a semi-automatically curated comprehensive hierarchical fashion taxonomy for apparel, footwear, and accessories along with their attributes and relations. The taxonomy is curated from several fashion resources and then hand tuned by domain experts. All the APIs below leverage this fashion taxonomy. Fashion evolves constantly and hence IBM fashion taxonomy is dynamically updated at regular intervals to include the current fashion terms and trends. The user will always have access to the latest fashion taxonomy when using any of these APIs.
@@ -134,24 +137,28 @@ The APIs come in two flavors. Some APIs are simple and do not require access to 
   "1": {
    "camera_focus": "full", 
    "pose": "front", 
+   "ignore": "no",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Front_Large.jpg", 
    "model_worn": "yes"
   }, 
   "3": {
    "camera_focus": "detail", 
    "pose": "UNK", 
+   "ignore": "yes",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Detail_Large.jpg", 
    "model_worn": "no"
   }, 
   "2": {
    "camera_focus": "full", 
    "pose": "right", 
+   "ignore": "no",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Right_Large.jpg", 
    "model_worn": "yes"
   }, 
   "4": {
    "camera_focus": "full", 
    "pose": "back", 
+   "ignore": "no",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Back_Large.jpg", 
    "model_worn": "yes"
   }
@@ -206,7 +213,7 @@ field | type | description
 **id** | string | A unique identifier for the product for which there is a product page and a set of product images associated with it. 
 url | string | The corresponding url of the product page.
 date | string | The date when the item was entered into the catalog, in `YYYY-MM-DD` format.
-out_of_stock | string | Can either be `yes` or `no`. This is the field that need to be changed to `yes` when a product goes out of stock. By default all search queries will not return out-of-stock products.
+out_of_stock | string | Can either be `yes` or `no`. This is the field that need to be changed to `yes` when a product goes out of stock. By default all search queries will not return out-of-stock products. Note that typically out of stock is at the SKU level. Ideally make this `yes`  only when all SKUs for this product are out of stock.
 | | | *You will typically use this when the product will be replenished. If you think the product will be discontinued and not available again you can delete that product entirely.*
 **name** | string | The name of the product. This is generally a free text brief description of the product.
 category | string | The product category.
@@ -214,12 +221,13 @@ taxonomy | string | The complete product taxonomy if known, separated via `;`.
 **gender** | string | The gender for which the product is intended for, can be `male`, `female` or `unisex`.
 age_group | list string | The age group for which the product is intended for. Some suggested tags : `baby`, `kid`, `teenager`, `adult`.
 **images** | list of dict | A list of images available for the product with `image_id` as the key and the following fields in the dict. 
-| | image_id | The image id.
-| | image_url | The image url. The actual image will be downloaded from this url to build the visual search index. The image can be in PNG, JPEG, BMP, or GIF.
+| | image_id | The image id (string).
+| | image_url | The image url. The actual image will be downloaded from this url to build the visual search index. The image format can be in JPEG,PNG,BMP, or GIF.
+| | ignore | You can use this field to select what kind of images should be used for visual browse/search.  If `yes` then the image will not be downloaded and excluded from visual browse/search. In the example on the right, we ignore all images which have close-up of some details in the product.
 | | model_worn | If `yes` then the image corresponds to the model wearing the particular product. If `no` refers to image of the the product only. Use `UNK` if not known.
 | | pose | Refers to the pose/orientation in which the image is taken. Can take one of the following values: `front`, `back`, `left`, `right`, `top`, `UNK`.
-| | camera_focus | Which part of the model the camera is focussed on. Can take one of the following values: `full` (complete view of the model, entire body), `top` (upper part of the model above the waist, used in shirts etc.), `bottom` (lower part of the model below the waist, used in trousers etc.), `portrait` (model face, normally up to the shoulder), `detail` (a close-up of some details in the product), `UNK`.
-| | | *The tags `model_worn`, `pose` and `orientation` are optional. Also images with `camera_focus` of type `detail` will be excluded from visual browse/search.*
+| | camera_focus | Which part of the model the camera is focussed on. Can take one of the following values: `full` (complete view of the model, entire body), `top` (upper part of the model above the waist, used in shirts etc.), `bottom` (lower part of the model below the waist, used in trousers etc.), `portrait` (model face, normally up to the shoulder), `detail` (a close-up of some details in the product), `outfit` (complete view of the model, entire body along with other apparel and accessories), `UNK`.
+| | | *The fields `ignore`,`model_worn`, `pose` and `camera_focus` are optional.*
 color | list of string | A list of colors terms that describe the colors in the product.
 pattern | list of string | A list of pattern terms that describe the pattern on the fabric.
 fabric | list of string | A list of terms that describe the fabric used in the product.
@@ -270,7 +278,6 @@ json_filenames = [f for f in os.listdir(catalog_folder) if not f.startswith('.')
 params = {}
 # Optional parameters.
 params['download_images'] = 'true'
-params['ignore_detail_images'] = 'true'
 
 for filename in json_filenames:
     # load the json file
@@ -320,7 +327,7 @@ catalog_name | path | (**Required**) The catalog name. |
 id | path | (**Required**) The product id. |
 data | application/json | (**Required**) The json object file in the the format specified [earlier](#product-json-format). |  
 download_images | query | By default all the images specified in the json will be downloaded. Set this to `false` if you do not want to download the images.  | `true`  
-ignore_detail_images | query |  By default visual search ignores images of type `detail` (specified by the field `camera_focus` in the json) and hence does not download these images. Set this to `false` if you also want to download the `detail` images.  | `true`  
+
 
 ### Response 
 
@@ -331,7 +338,7 @@ id | The product id.
 version | The version number. Every update will be assigned a new version number.
 n_images | The total number of images in the json file.
 n_images_downloaded | The actual number of images successfully downloaded. 
-n_images_ignored | The total number of images ignored (images of type `detail`). 
+n_images_ignored | The total number of images ignored (specified by the field `ignore` in `images`). 
 n_images_error | The number of images for which there was some error in downloading. 
 n_images_existing | The number of images which were already downloaded.
 
@@ -399,6 +406,7 @@ print response.json()
    "1": {
     "camera_focus": "UNK",
     "pose": "front",
+    "ignore": "no",
     "image_url": "http://images.abofcdn.com/catalog/images/2015/20DRA16FWCWFT9010970/Front_Large.jpg",
     "model_worn": "yes",
     "image_filename": "20DRA16FWCWFT9010970_1_front_UNK.jpg"
@@ -406,6 +414,7 @@ print response.json()
    "3": {
     "camera_focus": "UNK",
     "pose": "right",
+    "ignore": "no",
     "image_url": "http://images.abofcdn.com/catalog/images/2015/20DRA16FWCWFT9010970/Right_Large.jpg",
     "model_worn": "yes",
     "image_filename": "20DRA16FWCWFT9010970_3_right_UNK.jpg"
@@ -413,6 +422,7 @@ print response.json()
    "2": {
     "camera_focus": "UNK",
     "pose": "left",
+    "ignore": "no",
     "image_url": "http://images.abofcdn.com/catalog/images/2015/20DRA16FWCWFT9010970/Left_Large.jpg",
     "model_worn": "yes",
     "image_filename": "20DRA16FWCWFT9010970_2_left_UNK.jpg"
@@ -420,6 +430,7 @@ print response.json()
    "5": {
     "camera_focus": "UNK",
     "pose": "top",
+    "ignore": "no",
     "image_url": "http://images.abofcdn.com/catalog/images/2015/20DRA16FWCWFT9010970/Top_Large.jpg",
     "model_worn": "yes",
     "image_filename": "20DRA16FWCWFT9010970_5_top_UNK.jpg"
@@ -427,6 +438,7 @@ print response.json()
    "4": {
     "camera_focus": "detail",
     "pose": "UNK",
+    "ignore": "yes",
     "image_url": "http://images.abofcdn.com/catalog/images/2015/20DRA16FWCWFT9010970/Detail_Large.jpg",
     "model_worn": "yes",
     "image_filename": "20DRA16FWCWFT9010970_4_UNK_detail.jpg"
@@ -434,6 +446,7 @@ print response.json()
    "6": {
     "camera_focus": "full",
     "pose": "front",
+    "ignore": "yes",
     "image_url": "http://images.abofcdn.com/catalog/images/2015/20DRA16FWCWFT9010970/Look_Large.jpg",
     "model_worn": "yes",
     "image_filename": "20DRA16FWCWFT9010970_6_front_full.jpg"
@@ -605,7 +618,6 @@ data['out_of_stock'] = 'yes'
 params = {}
 # Optional parameters.
 params['download_images'] = 'true'
-params['ignore_detail_images'] = 'true'
 
 response = requests.put(url,
                         headers=headers,
@@ -643,7 +655,6 @@ catalog_name | path | (**Required**) The catalog name. |
 id | path | (**Required**) The product id. |
 data | application/json | (**Required**) The json object file in the the format specified [earlier](#product-json-format) containing only the modifications. |  
 download_images | query | By default all the images specified in the json will be downloaded. Set this to `false` if you do not want to download the images.  | `true`  
-ignore_detail_images | query |  By default visual search ignores images of type `detail` (specified by the field `camera_focus` in the json) and hence does not download these images. Set this to `false` if you also want to download the `detail` images.  | `true`  
 
 ### Response 
 
@@ -1286,11 +1297,7 @@ api_endpoint = '/v1/catalog/%s/visual_search_index'%(catalog_name)
 
 url = urljoin(api_gateway_url,api_endpoint)
 
-params = {}
-# Optional parameters.
-params['ignore_detail_images'] = 'true'
-
-response = requests.post(url,headers=headers,params=params)
+response = requests.post(url,headers=headers)
 
 print response.status_code
 print response.json()
@@ -1339,7 +1346,6 @@ This is a one time long running operation. Currently it takes around 1-2 seconds
 Parameter | Type | Description | Default
 --------- | ------- | ----------- | ----------- 
 catalog_name | path | (**Required**) The catalog name. |
-ignore_detail_images | query |  By default visual search ignores images of type `detail` (specified by the field `camera_focus` in the json). Set this to `false` if you also want to include the `detail` images.  | `true`  
 
 ### Response 
 
