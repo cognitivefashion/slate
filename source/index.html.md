@@ -789,6 +789,60 @@ time_ms |  The time taken in milliseconds.
 catalog_name | The catalog name.
 deleted | This returns true is the catalog was successfully deleted.
 
+## Get all catalog names    
+
+```python
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# API end point.
+api_endpoint = '/v1/catalog_names'
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,headers=headers)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+  "catalog_names": ["sample_catalog",
+                    "sample_catalog_2"],
+  "time_ms": "3.78"
+}
+```
+
+Get all the catalog names.
+
+### End point
+
+`GET /v1/catalog_names`
+
+### Request
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+catalog_names | The catalog names.
+
 # Natural Language Search
 
 The Natural Language Search (NLS) for fashion allows the user to search a fashion e-commerce catalog using complex **natural language queries**. Below are a few sample queries that NLS can handle:
