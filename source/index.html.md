@@ -1388,7 +1388,7 @@ Build the visual search index.
 Before you can start using the visual search and visual browse APIs the visual search index has to be built first. This API computes the feature representations for all the uploaded images and then builds an index for fast nearest neighbor retrieval.
 
 <aside class="notice">
-This is a one time long running operation. Currently it takes around 1-2 seconds to compute the features for one image on a bluemix instance (until bluemix supports GPU instances). Depending on your catalog size you will have to wait till the index creation is completed to start using the visual search APIs. You can query the status of the index creation using the GET endpoint. The index is built when the status becomes `done`
+This is a one time long running operation. Currently it takes around 250-500 milliseconds to compute the features for one image on a bluemix instance (until bluemix supports GPU instances). Depending on your catalog size you will have to wait till the index creation is completed to start using the visual search APIs. You can query the status of the index creation using the GET endpoint. The index is built when the status becomes `done`
 </aside>
 
 ### End point
@@ -1974,6 +1974,80 @@ Parameter |  Description
 --------- |  -----------
 time_ms |  The time taken in milliseconds.
 similar_colors |  A list of five closest color terms.
+
+## Get color similairty 
+
+```python
+#------------------------------------------------------------------------------
+# Get similarity score between two color terms. 
+# GET /v1/colors/color_terms_similarity
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+api_endpoint = '/v1/colors/color_terms_similarity'
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+params = {}
+params['color_term_1'] = 'red'
+params['color_term_2'] = 'pink'
+
+response = requests.get(url,
+                        headers=headers,
+                        params=params)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+  "similarity_score": 0.650632524978343,
+  "time_ms": u'22.23'
+}
+```
+
+Get similarity score between two color terms (eg. 'red' and 'pink'). 
+
+Uses the [CIEDE2000](https://en.wikipedia.org/wiki/Color_difference) metric to measure similarity between two color terms. 
+
+<aside class="notice">
+We internally use our color taxonomy to get the RGB values for the color term. If the color terms are not in our color taxonomy the code defaults to the jaccard similarity between the color terms.
+</aside>
+
+### End point
+
+`GET /v1/colors/color_terms_similarity`
+
+### Request
+
+Parameter | Type | Description 
+--------- | ------- | ----------- 
+color_term_1  | query | (**Required**) The first  color term.
+color_term_2  | query | (**Required**) The second color term.
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+similarity_score |  The similarity score (between 0 and 1) which indicates the similarity between the two color terms. Interanlly it uses the [CIEDE2000](https://en.wikipedia.org/wiki/Color_difference) metric to measure similarity between two color terms. 
 
 ## Dominant color palette
 
