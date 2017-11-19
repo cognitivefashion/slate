@@ -2054,13 +2054,14 @@ similarity_score |  The similarity score (between 0 and 1) which indicates the s
 ```python
 #------------------------------------------------------------------------------
 # Dominant color palette. 
-# POST /v1/colors/image_color_palette
+# POST /v1/colors/dominant_colors
 #------------------------------------------------------------------------------
 
 import os
 import json
 import requests
 from urlparse import urljoin
+from pprint import pprint
 
 from props import *
 
@@ -2071,109 +2072,1014 @@ api_gateway_url = props['api_gateway_url']
 # Replace 'your_api_key' with your API key.
 headers = {'X-Api-Key': props['X-Api-Key']}
 
-api_endpoint = '/v1/colors/image_color_palette'
+params = {}
+
+# Optional parameters.
+params['color_count'] = 3
+params['quality'] = 1
+params['image_max_dimension'] = 256
+
+api_endpoint = '/v1/colors/dominant_colors'
 
 url = urljoin(api_gateway_url,api_endpoint)
 
 headers['Content-Type'] = 'image/jpeg'
 
-response = requests.post(url,headers=headers,data=open('test_image_2.jpeg','rb'))
+response = requests.post(url,
+                         headers=headers,
+                         params=params,
+                         data=open('test_image_2.jpeg','rb'))
 
 print response.status_code
-print response.json()
+pprint(response.json())
 ```
 
 > Sample json response
 
 ```json
 {
- "color_palette": [
+ "dominant_colors": [
   {
-   "rgb": [
-    240,
-    86,
-    74
+   "name": "lavender blush",
+   "hex": "#f7e8f2",
+   "universal_name": "white",
+   "lab": [
+    93.40649747006204,
+    6.792207586509836,
+    -3.019243619029366
    ],
-   "entrylevel_name": "tomato",
-   "hex": "#f0564a",
-   "name": "tart orange",
-   "universal_name": "red"
-  },
-  {
    "rgb": [
     247,
-    243,
-    248
+    232,
+    242
    ],
-   "entrylevel_name": "off white",
-   "hex": "#f7f3f8",
-   "name": "off white",
-   "universal_name": "white"
+   "hsv": [
+    320.00000000000006,
+    0.06072874493927127,
+    0.9686274509803922
+   ],
+   "entrylevel_name": "off white"
   },
   {
-   "rgb": [
-    246,
-    171,
-    216
+   "name": "carmine pink",
+   "hex": "#ed574b",
+   "universal_name": "red",
+   "lab": [
+    57.398596108439904,
+    57.08313749589916,
+    37.966663400202684
    ],
-   "entrylevel_name": "pink",
-   "hex": "#f6abd8",
-   "name": "light hot pink",
-   "universal_name": "pink"
+   "rgb": [
+    237,
+    87,
+    75
+   ],
+   "hsv": [
+    4.444444444444457,
+    0.6835443037974683,
+    0.9294117647058824
+   ],
+   "entrylevel_name": "tomato"
   },
   {
-   "rgb": [
-    66,
-    52,
-    52
-   ],
-   "entrylevel_name": "black",
-   "hex": "#423434",
    "name": "old burgundy",
-   "universal_name": "black"
-  },
-  {
-   "rgb": [
-    204,
-    139,
-    113
+   "hex": "#483431",
+   "universal_name": "black",
+   "lab": [
+    23.854492807791047,
+    8.487853036308863,
+    5.404592036438394
    ],
-   "entrylevel_name": "coral",
-   "hex": "#cc8b71",
-   "name": "copper crayola",
-   "universal_name": "orange"
+   "rgb": [
+    72,
+    52,
+    49
+   ],
+   "hsv": [
+    7.826086956521749,
+    0.3194444444444444,
+    0.2823529411764706
+   ],
+   "entrylevel_name": "black"
   }
  ],
- "time_ms": "2139.95"
+ "time_ms": "1226.92"
 }
 ```
 
-Get the dominant color palette for a image.
+Get the dominant color palette for an image.
 
 ### End point
 
-`POST /v1/colors/image_color_palette`
+`POST /v1/colors/dominant_colors`
 
 ### Request
 
 Parameter | Type | Description 
 --------- | ------- | ----------- 
 data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
+color_count | query | The maximum number of dominant colors to extract per image. | 3
+quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
+image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
 
 ### Response 
 
 Parameter |  Description
 --------- |  -----------
 time_ms |  The time taken in milliseconds.
-color_palette |  The top 5 dominant colors in the image.
+computed_on | The time the dominant colors where computed.
+**dominant_colors** |  A list of dominant colors for the catalog sorted in the decreasing order of popularity. Each field in the list has the following fieldnames.
+rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
+hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
+hex | The hex code for the color.
+universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
+entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
+name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
+popularity | A score between 0 and 1 indicating the popularity of the color.
+popularity_percentile | The corresponding percentile score.
+n_instances | The number of colors in the cluster.
 
-# Cognitive Stylist
 
-Coming soon...
+# Color Search
 
-## What goes well with this
+A collection of APIs for enabling catalog search based on colors.
 
-Given an fashion apparel suggest another apparel/accessory that goes well with it.
+## Build color search index
+
+```python
+#------------------------------------------------------------------------------
+# Build the color search index.
+# POST /v1/catalog/{catalog_name}/color_search_index
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+params = {}
+
+# Optional parameters.
+params['color_count'] = 3
+params['quality'] = 1
+params['image_max_dimension'] = 256
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search_index'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.post(url,headers=headers,params=params)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "status": {
+  "status": "done",
+  "color_computation": {
+   "num_of_images_ignored": "14",
+   "num_of_images_existing": "0",
+   "num_of_images_error": "0",
+   "num_of_images_processed": "46"
+  },
+  "finish_time": "2017-11-18 04:35:03.112859",
+  "start_time": "2017-11-18 04:34:51.450504",
+  "pid": "224",
+  "index_updated": "true",
+  "num_of_products": "10",
+  "num_of_images": "60",
+  "color_search_index": {
+   "num_of_images_missing_colors": "0",
+   "num_of_images_indexed": "46",
+   "num_of_images_ignored": "14"
+  }
+ },
+ "time_ms": "1.97"
+}
+```
+
+Build the color search index.
+
+Before you can start using the color search APIs the color search index has to be built. This API computes the dominant colors for all the uploaded images in the catalog and then builds an index for fast nearest neighbor retrieval.
+
+<aside class="notice">
+This is a one time long running operation. Currently it takes around 200-500 milliseconds to compute the dominant colors for one image. Depending on your catalog size you will have to wait till the index creation is completed to start using the color search APIs. You can query the status of the index creation using the GET endpoint. The index is built when the status changes to `done`
+</aside>
+
+### End point
+
+`POST /v1/catalog/{catalog_name}/color_search_index`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+color_count | query | The maximum number of dominant colors to extract per image. | 3
+quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
+image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**status** | A json containing various info about the current status of the index building process.
+status | The current status of the index building process. The status can be one of `computing_dominant_color`,`building_index`,or `done`. The index is built when the status becomes `done`.
+num_of_products | The number of products in the catalog.
+num_of_images | The total number of images in the catalog.
+start_time | The time when the index building started.
+finish_time | The time when the index building finished.
+**color_computation** | Info about dominant color computation.
+num_of_images_error | The number of images for which there was some error in dominant color computation.
+num_of_images_ignored | The number of images that were ignored.
+num_of_images_existing | The number of images for which the dominant colors were already computed (in case of building a new index with new products added).
+num_of_images_processed | The total number of images for which the dominant colors were computed. 
+**color_search_index** | Info about the index building.
+num_of_images_missing_colors | The number of images for which there was no dominant color was found.
+num_of_images_ignored | The number of images that were ignored.
+num_of_images_indexed | The total number of images finally indexed.
+
+<aside class="notice">
+Any time you add new images to the catalog you will have to rebuild the index by calling this API again. Note that the dominant colors for the old images will still be saved and we will be computing the dominant colors only for the newly added images.
+</aside>
+
+<aside class="warning">
+The current version supports building only one index at the same time and does not allow you to build another index when a current index building process in running. Please wait till the current index creation is completed. 
+</aside>
+
+## Get color search index status
+
+```python
+#------------------------------------------------------------------------------
+# Get the status of the color search index.
+# GET /v1/catalog/{catalog_name}/color_search_index
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search_index'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,headers=headers)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "status": {
+  "status": "done",
+  "color_computation": {
+   "num_of_images_ignored": "14",
+   "num_of_images_existing": "0",
+   "num_of_images_error": "0",
+   "num_of_images_processed": "46"
+  },
+  "finish_time": "2017-11-18 04:35:03.112859",
+  "start_time": "2017-11-18 04:34:51.450504",
+  "pid": "224",
+  "index_updated": "true",
+  "num_of_products": "10",
+  "num_of_images": "60",
+  "color_search_index": {
+   "num_of_images_missing_colors": "0",
+   "num_of_images_indexed": "46",
+   "num_of_images_ignored": "14"
+  }
+ },
+ "time_ms": "1.97"
+}
+```
+
+Get the status of the color search index.
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/color_search_index`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**status** | A json containing various info about the current status of the index building process.
+status | The current status of the index building process. The status can be one of `computing_dominant_color`,`building_index`,or `done`. The index is built when the status becomes `done`.
+num_of_products | The number of products in the catalog.
+num_of_images | The total number of images in the catalog.
+start_time | The time when the index building started.
+finish_time | The time when the index building finished.
+**color_computation** | Info about dominant color computation.
+num_of_images_error | The number of images for which there was some error in dominant color computation.
+num_of_images_ignored | The number of images that were ignored.
+num_of_images_existing | The number of images for which the dominant colors were already computed (in case of building a new index with new products added).
+num_of_images_processed | The total number of images for which the dominant colors were computed. 
+**color_search_index** | Info about the index building.
+num_of_images_missing_colors | The number of images for which there was no dominant color was found.
+num_of_images_ignored | The number of images that were ignored.
+num_of_images_indexed | The total number of images finally indexed.
+
+## Delete the color search index 
+
+```python
+#------------------------------------------------------------------------------
+# Delete the color search index.
+# DELETE /v1/catalog/{catalog_name}/color_search_index
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search_index'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.delete(url,headers=headers)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "deleted": true,
+ "time_ms": "8.88",
+ "catalog_name": "sample_catalog"
+}
+```
+
+Delete the color search index.
+
+### End point
+
+`DELETE /v1/catalog/{catalog_name}/color_search_index`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+catalog_name | The catalog name.
+deleted |  This is `true` if the index was successfully deleted.
+
+
+# Dominant Colors
+
+A collection of APIs for computing the dominant colors for the catalog.
+
+## Build dominant colors index
+
+```python
+#------------------------------------------------------------------------------
+# Build the dominant colors index.
+# POST /v1/catalog/{catalog_name}/dominant_colors_index
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+params = {}
+
+# Optional parameters.
+params['colors'] = 20
+params['max_colors_per_image'] = 2
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/dominant_colors_index'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.post(url,headers=headers,params=params)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "status": {
+  "status": "done",
+  "num_of_products": "10",
+  "results_updated": "true",
+  "start_time": "2017-11-18 17:10:00.141319",
+  "pid": "379",
+  "dominant_colors": {
+   "num_of_images_missing_colors": "0",
+   "num_of_images_indexed": "46",
+   "num_of_images_ignored": "14"
+  },
+  "finish_time": "2017-11-18 17:10:05.956428",
+  "num_of_images": "60"
+ },
+ "time_ms": "2.51"
+}
+```
+
+Build the dominant colors index.
+
+This loads all the dominant colors for every image in the catalog and then clusters the colors to compute the dominant colors for the entire catalog. Before you can start querying for the dominant colors you need to call this API to start the clustering procedure. 
+
+<aside class="notice">
+Prior to calling this API the colors search index has to be built, which computes the dominant colors for all the images. 
+</aside>
+
+<aside class="notice">
+This is a one time long running operation. Depending on your catalog size you will have to wait till the index creation is completed to start using the dominant colors APIs. You can query the status of the index creation using the GET endpoint. The clusteing is completed when the status changes to `done`
+</aside>
+
+### End point
+
+`POST /v1/catalog/{catalog_name}/dominant_colors_index`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+colors | query | The number of dominant colors to compute. | 10
+max_colors_per_image | query | The maximum number of dominant colors to use per image. | all available colors
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**status** | A json containing various info about the current status of the index building process.
+status | The current status of the index building process. The status can be one of `clustering` or `done`. The index is built when the status becomes `done`.
+num_of_products | The number of products in the catalog.
+num_of_images | The total number of images in the catalog.
+start_time | The time when the index building started.
+finish_time | The time when the index building finished.
+**dominant_colors** | Info about dominant color.
+num_of_images_missing_colors | The number of images for which there was no dominant color was found.
+num_of_images_ignored | The number of images that were ignored.
+num_of_images_indexed | The total number of images finally indexed.
+
+<aside class="warning">
+The current version supports building only one index at the same time and does not allow you to build another index when a current index building process in running. Please wait till the current index creation is completed. 
+</aside>
+
+## Get dominant colors index status
+
+```python
+#------------------------------------------------------------------------------
+# Get the status of the dominant colors index.
+# GET /v1/catalog/{catalog_name}/dominant_colors_index
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/dominant_colors_index'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,headers=headers)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "status": {
+  "status": "done",
+  "num_of_products": "10",
+  "results_updated": "true",
+  "start_time": "2017-11-18 17:10:00.141319",
+  "pid": "379",
+  "dominant_colors": {
+   "num_of_images_missing_colors": "0",
+   "num_of_images_indexed": "46",
+   "num_of_images_ignored": "14"
+  },
+  "finish_time": "2017-11-18 17:10:05.956428",
+  "num_of_images": "60"
+ },
+ "time_ms": "2.51"
+}
+```
+
+Get the status of the dominant colors index.
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/dominant_colors_index`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**status** | A json containing various info about the current status of the index building process.
+status | The current status of the index building process. The status can be one of `clustering` or `done`. The index is built when the status becomes `done`.
+num_of_products | The number of products in the catalog.
+num_of_images | The total number of images in the catalog.
+start_time | The time when the index building started.
+finish_time | The time when the index building finished.
+**dominant_colors** | Info about dominant color.
+num_of_images_missing_colors | The number of images for which there was no dominant color was found.
+num_of_images_ignored | The number of images that were ignored.
+num_of_images_indexed | The total number of images finally indexed.
+
+## Delete the dominant colors index 
+
+```python
+#------------------------------------------------------------------------------
+# Delete the dominant colors index.
+# DELETE /v1/catalog/{catalog_name}/dominant_colors_index
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/dominant_colors_index'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.delete(url,headers=headers)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "deleted": true,
+ "time_ms": "8.88",
+ "catalog_name": "sample_catalog"
+}
+```
+
+Delete the dominant colors index.
+
+### End point
+
+`DELETE /v1/catalog/{catalog_name}/dominant_colors_index`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+catalog_name | The catalog name.
+deleted |  This is `true` if the index was successfully deleted.
+
+## Get dominant colors for a catalog
+
+```python
+#------------------------------------------------------------------------------
+# Get the dominant colors for all images in the catalog.
+# GET /v1/catalog/{catalog_name}/dominant_colors
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+params = {}
+params['colors'] = 5
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/dominant_colors'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,headers=headers,params=params)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "computed_on": "2017-11-18 17:38:03.146494",
+ "time_ms": "2.69",
+ "dominant_colors": [
+  {
+   "name": "platinum",
+   "popularity": 0.20652173913043478,
+   "hex": "#e6e3e1",
+   "universal_name": "white",
+   "popularity_percentile": 100.0,
+   "rgb": [
+    230,
+    227,
+    225
+   ],
+   "hsv": [
+    23.999999999999886,
+    0.021739130434782705,
+    0.9019607843137255
+   ],
+   "n_instances": 19,
+   "entrylevel_name": "white"
+  },
+  {
+   "name": "platinum",
+   "popularity": 0.17391304347826086,
+   "hex": "#e9e8e7",
+   "universal_name": "white",
+   "popularity_percentile": 95.0,
+   "rgb": [
+    233,
+    232,
+    231
+   ],
+   "hsv": [
+    30.0,
+    0.008583690987124415,
+    0.9137254901960784
+   ],
+   "n_instances": 16,
+   "entrylevel_name": "white"
+  },
+  {
+   "name": "timberwolf",
+   "popularity": 0.08695652173913043,
+   "hex": "#dfdad6",
+   "universal_name": "white",
+   "popularity_percentile": 90.0,
+   "rgb": [
+    223,
+    218,
+    214
+   ],
+   "hsv": [
+    26.666666666666572,
+    0.04035874439461884,
+    0.8745098039215686
+   ],
+   "n_instances": 8,
+   "entrylevel_name": "silver"
+  },
+  {
+   "name": "jet",
+   "popularity": 0.07608695652173914,
+   "hex": "#36322f",
+   "universal_name": "black",
+   "popularity_percentile": 85.0,
+   "rgb": [
+    54,
+    50,
+    47
+   ],
+   "hsv": [
+    25.714285714285722,
+    0.12962962962962954,
+    0.21176470588235294
+   ],
+   "n_instances": 7,
+   "entrylevel_name": "black"
+  },
+  {
+   "name": "raisin black",
+   "popularity": 0.05434782608695652,
+   "hex": "#24222c",
+   "universal_name": "black",
+   "popularity_percentile": 77.5,
+   "rgb": [
+    36,
+    34,
+    44
+   ],
+   "hsv": [
+    252.0,
+    0.2272727272727273,
+    0.17254901960784313
+   ],
+   "n_instances": 5,
+   "entrylevel_name": "black"
+  }
+ ]
+}
+```
+
+Get the dominant colors for all images in the catalog.
+
+The dominant colors is to be interpreted as a representative of the cluster of similar colors.
+
+<aside class="notice">
+Prior to calling this API the dominant colors index has to be built.
+</aside>
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/dominant_colors`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+colors | query | The number of dominant colors to return. | 10
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+computed_on | The time the dominant colors where computed.
+**dominant_colors** |  A list of dominant colors for the catalog sorted in the decreasing order of popularity. Each field in the list has the following fieldnames.
+rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
+hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
+hex | The hex code for the color.
+universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
+entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
+name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
+popularity | A score between 0 and 1 indicating the popularity of the color.
+popularity_percentile | The corresponding percentile score.
+n_instances | The number of colors in the cluster.
+
+## Get dominant colors for a product
+
+```python
+#------------------------------------------------------------------------------
+# Get the dominant colors for an image in the catalog.
+# GET /v1/catalog/{catalog_name}/dominant_colors/{id}/{image_id}
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+id ='109FA16AWWWTN9C36M18'
+image_id = '1'
+
+api_endpoint = '/v1/catalog/%s/dominant_colors/%s/%s'%(catalog_name,id,image_id)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,headers=headers)
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "dominant_colors": [
+  {
+   "name": "platinum",
+   "hex": "#eae5e1",
+   "universal_name": "white",
+   "lab": [
+    91.21959480157497,
+    0.9891444931204307,
+    2.535346529827587
+   ],
+   "rgb": [
+    234,
+    229,
+    225
+   ],
+   "hsv": [
+    26.666666666666742,
+    0.038461538461538436,
+    0.9176470588235294
+   ],
+   "entrylevel_name": "white"
+  },
+  {
+   "name": "carrot orange",
+   "hex": "#f49023",
+   "universal_name": "orange",
+   "lab": [
+    68.97150523958666,
+    30.7687372058737,
+    67.65927525225112
+   ],
+   "rgb": [
+    244,
+    144,
+    35
+   ],
+   "hsv": [
+    31.291866028708114,
+    0.8565573770491803,
+    0.9568627450980393
+   ],
+   "entrylevel_name": "orange"
+  },
+  {
+   "name": "cinnamon",
+   "hex": "#d16718",
+   "universal_name": "orange",
+   "lab": [
+    55.405269947627616,
+    37.53890699256518,
+    58.230572519589465
+   ],
+   "rgb": [
+    209,
+    103,
+    24
+   ],
+   "hsv": [
+    25.621621621621614,
+    0.8851674641148325,
+    0.8196078431372549
+   ],
+   "entrylevel_name": "copper"
+  }
+ ],
+ "time_ms": "1.90"
+}
+```
+
+Get the dominant colors for an image in the catalog.
+
+<aside class="notice">
+Prior to calling this API the dominant colors index has to be built.
+</aside>
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/dominant_colors/{id}/{image_id}`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+id | path | (**Required**) The product id. |
+image_id | path | (**Required**) The image id. |
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+computed_on | The time the dominant colors where computed.
+**dominant_colors** |  A list of dominant colors. Each field in the list has the following fieldnames.
+rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
+hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
+hex | The hex code for the color.
+universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
+entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
+name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
+popularity | A score between 0 and 1 indicating the popularity of the color.
+popularity_percentile | The corresponding percentile score.
+n_instances | The number of colors in the cluster.
 
 # Zietgiest
 
@@ -2183,8 +3089,9 @@ Coming soon..
 
 Analyze dominant color palette for a given instagram hashtag/user account.
 
+# Complete the Look
 
-
+Given an fashion apparel suggest another apparel/accessory that goes well with it.
 
 
 
