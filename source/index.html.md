@@ -2729,7 +2729,7 @@ distance | The euclidean distance (in LAB space)  between the color in the image
 ```python
 #------------------------------------------------------------------------------
 # Get similar color images in the catalog for a given uploaded image.
-# GET /v1/catalog/{catalog_name}/color_search
+# POST /v1/catalog/{catalog_name}/color_search
 # params - color_count,image_max_dimension,max_number_of_results
 #------------------------------------------------------------------------------
 
@@ -2762,7 +2762,7 @@ api_endpoint = '/v1/catalog/%s/color_search'%(catalog_name)
 
 url = urljoin(api_gateway_url,api_endpoint)
 
-response = requests.get(url,
+response = requests.post(url,
                         headers=headers,
                         params=params,
                         data=open('test_image_2.jpeg','rb'))
@@ -2825,7 +2825,7 @@ The color search index has to be built first before you can use this API.
 
 ### End point
 
-`GET /v1/catalog/{catalog_name}/color_search`
+`POST /v1/catalog/{catalog_name}/color_search`
 
 ### Request
 
