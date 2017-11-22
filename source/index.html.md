@@ -2049,155 +2049,6 @@ Parameter |  Description
 time_ms |  The time taken in milliseconds.
 similarity_score |  The similarity score (between 0 and 1) which indicates the similarity between the two color terms. Interanlly it uses the [CIEDE2000](https://en.wikipedia.org/wiki/Color_difference) metric to measure similarity between two color terms. 
 
-## Dominant color palette
-
-```python
-#------------------------------------------------------------------------------
-# Dominant color palette. 
-# POST /v1/colors/dominant_colors
-#------------------------------------------------------------------------------
-
-import os
-import json
-import requests
-from urlparse import urljoin
-from pprint import pprint
-
-from props import *
-
-# Replace this with the custom url generated for you.
-api_gateway_url = props['api_gateway_url']
-
-# Pass the api key into the header
-# Replace 'your_api_key' with your API key.
-headers = {'X-Api-Key': props['X-Api-Key']}
-
-params = {}
-
-# Optional parameters.
-params['color_count'] = 3
-params['quality'] = 1
-params['image_max_dimension'] = 256
-
-api_endpoint = '/v1/colors/dominant_colors'
-
-url = urljoin(api_gateway_url,api_endpoint)
-
-headers['Content-Type'] = 'image/jpeg'
-
-response = requests.post(url,
-                         headers=headers,
-                         params=params,
-                         data=open('test_image_2.jpeg','rb'))
-
-print response.status_code
-pprint(response.json())
-```
-
-> Sample json response
-
-```json
-{
- "dominant_colors": [
-  {
-   "name": "lavender blush",
-   "hex": "#f7e8f2",
-   "universal_name": "white",
-   "lab": [
-    93.40649747006204,
-    6.792207586509836,
-    -3.019243619029366
-   ],
-   "rgb": [
-    247,
-    232,
-    242
-   ],
-   "hsv": [
-    320.00000000000006,
-    0.06072874493927127,
-    0.9686274509803922
-   ],
-   "entrylevel_name": "off white"
-  },
-  {
-   "name": "carmine pink",
-   "hex": "#ed574b",
-   "universal_name": "red",
-   "lab": [
-    57.398596108439904,
-    57.08313749589916,
-    37.966663400202684
-   ],
-   "rgb": [
-    237,
-    87,
-    75
-   ],
-   "hsv": [
-    4.444444444444457,
-    0.6835443037974683,
-    0.9294117647058824
-   ],
-   "entrylevel_name": "tomato"
-  },
-  {
-   "name": "old burgundy",
-   "hex": "#483431",
-   "universal_name": "black",
-   "lab": [
-    23.854492807791047,
-    8.487853036308863,
-    5.404592036438394
-   ],
-   "rgb": [
-    72,
-    52,
-    49
-   ],
-   "hsv": [
-    7.826086956521749,
-    0.3194444444444444,
-    0.2823529411764706
-   ],
-   "entrylevel_name": "black"
-  }
- ],
- "time_ms": "1226.92"
-}
-```
-
-Get the dominant color palette for an image.
-
-### End point
-
-`POST /v1/colors/dominant_colors`
-
-### Request
-
-Parameter | Type | Description 
---------- | ------- | ----------- 
-data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
-color_count | query | The maximum number of dominant colors to extract per image. | 3
-quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
-image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
-
-### Response 
-
-Parameter |  Description
---------- |  -----------
-time_ms |  The time taken in milliseconds.
-computed_on | The time the dominant colors where computed.
-**dominant_colors** |  A list of dominant colors for the catalog sorted in the decreasing order of popularity. Each field in the list has the following fieldnames.
-rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
-hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
-hex | The hex code for the color.
-universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
-entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
-name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
-popularity | A score between 0 and 1 indicating the popularity of the color.
-popularity_percentile | The corresponding percentile score.
-n_instances | The number of colors in the cluster.
 
 
 # Color Search
@@ -2488,6 +2339,515 @@ time_ms |  The time taken in milliseconds.
 catalog_name | The catalog name.
 deleted |  This is `true` if the index was successfully deleted.
 
+## Color Search by RGB
+
+```shell
+http://api_gateway_url/v1/catalog/sample_catalog/color_search?r=255&g=0&b=0m&ax_number_of_results=5&api_key=your_api_key
+```
+
+```python
+#------------------------------------------------------------------------------
+# Get similar color images in the catalog for a specified RGB value.
+# GET /v1/catalog/{catalog_name}/color_search
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+params = {}
+
+# Parameters.
+params['r'] = 255
+params['g'] = 0
+params['b'] = 0
+params['max_number_of_results'] = 5
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,
+                        headers=headers,
+                        params=params)
+
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "time_ms": "98.54",
+ "products": [
+  {
+   "distance": 51.557655334472656,
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "1"
+  },
+  {
+   "distance": 53.42538833618164,
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "4"
+  },
+  {
+   "distance": 59.01533126831055,
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "5"
+  },
+  {
+   "distance": 67.46210479736328,
+   "image_filename": "SHRES16AWFSDR9346A_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346A54/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346A",
+   "image_id": "1"
+  },
+  {
+   "distance": 67.5510482788086,
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "5"
+  }
+ ]
+}
+```
+
+Get similar color images in the catalog for a specified RGB value.
+
+<aside class="notice">
+The color search index has to be built first before you can use this API.  
+</aside>
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/color_search`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+r | query | (**Required**) The value for the red channel in the RGB color model (in the range 0 to 255).
+g | query | (**Required**) The value for the green channel in the RGB color model (in the range 0 to 255).
+b | query | (**Required**) The value for the blue channel in the RGB color model (in the range 0 to 255).
+max_number_of_results | query | maximum number of results to return | 12
+                
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**products** | A sorted list similar color images. Each item in the list has the following fields.
+image_id | The image id.
+id | The product id.
+image_filename | The image filename.
+image_url | The image url
+distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+
+## Color Search by name
+
+```shell
+http://api_gateway_url/v1/catalog/sample_catalog/color_search?color_term=red&ax_number_of_results=5&api_key=your_api_key
+```
+
+```python
+#------------------------------------------------------------------------------
+# Get similar color images in the catalog for a specified color name..
+# GET /v1/catalog/{catalog_name}/color_search
+# params - color_term,max_number_of_results
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Parameters.
+params = {}
+params['color_term'] = 'red' 
+params['max_number_of_results'] = 5
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,
+                        headers=headers,
+                        params=params)
+
+
+print response.status_code
+pprint(response.json())
+
+
+```
+
+> Sample json response
+
+```json
+{
+ "time_ms": "214.84",
+ "products": [
+  {
+   "distance": 51.557655334472656,
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "1"
+  },
+  {
+   "distance": 53.42538833618164,
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "4"
+  },
+  {
+   "distance": 59.01533126831055,
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "5"
+  },
+  {
+   "distance": 67.46210479736328,
+   "image_filename": "SHRES16AWFSDR9346A_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346A54/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346A",
+   "image_id": "1"
+  },
+  {
+   "distance": 67.5510482788086,
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "5"
+  }
+ ]
+}
+```
+
+Get similar color images in the catalog for a specified color name.
+
+<aside class="notice">
+The color search index has to be built first before you can use this API.  
+</aside>
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/color_search`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+color_term  | query | (**Required**) The color term (e.g. red).
+max_number_of_results | query | maximum number of results to return | 12
+                
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**products** | A sorted list similar color images. Each item in the list has the following fields.
+image_id | The image id.
+id | The product id.
+image_filename | The image filename.
+image_url | The image url
+distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+
+## Color Search by id
+
+```shell
+http://api_gateway_url/v1/catalog/sample_catalog/color_search?id=SHRES16AWFSDR9346B&image_id=1&color_count=1&max_number_of_results=5&api_key=your_api_key
+```
+
+```python
+#------------------------------------------------------------------------------
+# Get similar color images in the catalog for an existing image.
+# GET /v1/catalog/{catalog_name}/color_search
+# params - id,image_id,color_count,max_number_of_results
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Parameters.
+params = {}
+params['id'] = 'SHRES16AWFSDR9346B' 
+params['image_id'] = '1'
+params['color_count'] =  1
+params['max_number_of_results'] = 5
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,
+                        headers=headers,
+                        params=params)
+
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "time_ms": "25.82",
+ "products": [
+  {
+   "distance": 0.0,
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "1"
+  },
+  {
+   "distance": 0.0,
+   "image_filename": "SHRES16AWFSDR9346B_2.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "2"
+  },
+  {
+   "distance": 0.35167253017425537,
+   "image_filename": "LPJNA16AMDMTE91662_2.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/LPJNA16AMDMTE9166200/Right_Medium.jpg",
+   "id": "LPJNA16AMDMTE91662",
+   "image_id": "2"
+  },
+  {
+   "distance": 0.629985511302948,
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "4"
+  },
+  {
+   "distance": 0.6313580870628357,
+   "image_filename": "LPJNA16AMDMTE91662_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/LPJNA16AMDMTE9166200/Front_Medium.jpg",
+   "id": "LPJNA16AMDMTE91662",
+   "image_id": "1"
+  }
+ ]
+}
+```
+
+Get similar color images in the catalog for an existing image.
+
+<aside class="notice">
+The color search index has to be built first before you can use this API.  
+</aside>
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/color_search`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+id | path | (**Required**) The product id. |
+image_id | path | (**Required**) The image id. |
+color_count | path | The maximum number of dominant colors to search for in an image. | 1
+max_number_of_results | query | maximum number of results to return | 12
+                
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**products** | A sorted list similar color images. Each item in the list has the following fields.
+image_id | The image id.
+id | The product id.
+image_filename | The image filename.
+image_url | The image url
+distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+
+## Color Search by image
+
+```shell
+```
+
+```python
+#------------------------------------------------------------------------------
+# Get similar color images in the catalog for a given uploaded image.
+# GET /v1/catalog/{catalog_name}/color_search
+# params - color_count,image_max_dimension,max_number_of_results
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+# Parameters.
+params = {}
+params['color_count'] =  2
+params['max_number_of_results'] = 5
+
+headers['Content-Type'] = 'image/jpeg'
+
+# Catalog name.
+catalog_name = props['catalog_name']
+
+api_endpoint = '/v1/catalog/%s/color_search'%(catalog_name)
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+response = requests.get(url,
+                        headers=headers,
+                        params=params,
+                        data=open('test_image_2.jpeg','rb'))
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "time_ms": "1069.26",
+ "products": [
+  {
+   "distance": 21.60784339904785,
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "1"
+  },
+  {
+   "distance": 22.59739112854004,
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "4"
+  },
+  {
+   "distance": 28.862674713134766,
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "5"
+  },
+  {
+   "distance": 36.39692306518555,
+   "image_filename": "SHRES16AWFSDR9346A_1.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346A54/Look_Medium.jpg",
+   "id": "SHRES16AWFSDR9346A",
+   "image_id": "1"
+  },
+  {
+   "distance": 37.1317138671875,
+   "image_filename": "SHRES16AWFSDR9346B_2.jpg",
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_id": "2"
+  }
+ ]
+}
+```
+
+
+Get similar color images in the catalog for a given uploaded image.
+
+<aside class="notice">
+The color search index has to be built first before you can use this API.  
+</aside>
+
+### End point
+
+`GET /v1/catalog/{catalog_name}/color_search`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+catalog_name | path | (**Required**) The catalog name. |
+data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, 
+max_number_of_results | query | maximum number of results to return | 12
+color_count | path | The maximum number of dominant colors to search for in an image. | 1
+image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your image is of high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+                
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**products** | A sorted list similar color images. Each item in the list has the following fields.
+image_id | The image id.
+id | The product id.
+image_filename | The image filename.
+image_url | The image url
+distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
 
 # Dominant Colors
 
@@ -3081,13 +3441,161 @@ popularity | A score between 0 and 1 indicating the popularity of the color.
 popularity_percentile | The corresponding percentile score.
 n_instances | The number of colors in the cluster.
 
+## Get dominant colors for an image
+
+```python
+#------------------------------------------------------------------------------
+# Dominant color palette. 
+# POST /v1/colors/dominant_colors
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+params = {}
+
+# Optional parameters.
+params['color_count'] = 3
+params['quality'] = 1
+params['image_max_dimension'] = 256
+
+api_endpoint = '/v1/colors/dominant_colors'
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+headers['Content-Type'] = 'image/jpeg'
+
+response = requests.post(url,
+                         headers=headers,
+                         params=params,
+                         data=open('test_image_2.jpeg','rb'))
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "dominant_colors": [
+  {
+   "name": "lavender blush",
+   "hex": "#f7e8f2",
+   "universal_name": "white",
+   "lab": [
+    93.40649747006204,
+    6.792207586509836,
+    -3.019243619029366
+   ],
+   "rgb": [
+    247,
+    232,
+    242
+   ],
+   "hsv": [
+    320.00000000000006,
+    0.06072874493927127,
+    0.9686274509803922
+   ],
+   "entrylevel_name": "off white"
+  },
+  {
+   "name": "carmine pink",
+   "hex": "#ed574b",
+   "universal_name": "red",
+   "lab": [
+    57.398596108439904,
+    57.08313749589916,
+    37.966663400202684
+   ],
+   "rgb": [
+    237,
+    87,
+    75
+   ],
+   "hsv": [
+    4.444444444444457,
+    0.6835443037974683,
+    0.9294117647058824
+   ],
+   "entrylevel_name": "tomato"
+  },
+  {
+   "name": "old burgundy",
+   "hex": "#483431",
+   "universal_name": "black",
+   "lab": [
+    23.854492807791047,
+    8.487853036308863,
+    5.404592036438394
+   ],
+   "rgb": [
+    72,
+    52,
+    49
+   ],
+   "hsv": [
+    7.826086956521749,
+    0.3194444444444444,
+    0.2823529411764706
+   ],
+   "entrylevel_name": "black"
+  }
+ ],
+ "time_ms": "1226.92"
+}
+```
+
+Get the dominant color palette for an image.
+
+### End point
+
+`POST /v1/colors/dominant_colors`
+
+### Request
+
+Parameter | Type | Description 
+--------- | ------- | ----------- 
+data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
+color_count | query | The maximum number of dominant colors to extract per image. | 3
+quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
+image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+computed_on | The time the dominant colors where computed.
+**dominant_colors** |  A list of dominant colors for the catalog sorted in the decreasing order of popularity. Each field in the list has the following fieldnames.
+rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
+hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
+hex | The hex code for the color.
+universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
+entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
+name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
+popularity | A score between 0 and 1 indicating the popularity of the color.
+popularity_percentile | The corresponding percentile score.
+n_instances | The number of colors in the cluster.
+
 # Zietgiest
 
-Coming soon..
+Analyze and forecast fashion trends.
 
 ## Color trends
-
-Analyze dominant color palette for a given instagram hashtag/user account.
 
 # Complete the Look
 
