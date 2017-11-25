@@ -2466,6 +2466,7 @@ id | The product id.
 image_filename | The image filename.
 image_url | The image url
 distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+rgb | The RGB value of the matching color.
 
 ## Color Search by name
 
@@ -2592,6 +2593,7 @@ id | The product id.
 image_filename | The image filename.
 image_url | The image url
 distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+rgb | The RGB value of the matching color.
 
 ## Color Search by id
 
@@ -2720,6 +2722,7 @@ id | The product id.
 image_filename | The image filename.
 image_url | The image url
 distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+rgb | The RGB value of the matching color.
 
 ## Color Search by image
 
@@ -2836,6 +2839,7 @@ data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG,
 max_number_of_results | query | maximum number of results to return | 12
 color_count | path | The maximum number of dominant colors to search for in an image. | 1
 image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your image is of high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+rgb | The RGB value of the matching color.
                 
 ### Response 
 
@@ -3475,12 +3479,30 @@ api_endpoint = '/v1/colors/dominant_colors'
 
 url = urljoin(api_gateway_url,api_endpoint)
 
-headers['Content-Type'] = 'image/jpeg'
+# Three options to pass the image
 
+# OPTION 1 : Directly post the image
+headers['Content-Type'] = 'image/jpeg'
 response = requests.post(url,
                          headers=headers,
                          params=params,
                          data=open('test_image_2.jpeg','rb'))
+
+
+# OPTION 2 : Pass the image url
+params['image_url'] = 'http://vg-images.condecdn.net/image/oDXPOxw65EZ/crop/405'
+response = requests.post(url,
+                         headers=headers,
+                         params=params)
+                         
+# OPTION 3 : using multipart
+image_filename = 'test_image_2.jpeg'
+with open(image_filename,'rb') as images_file:
+    response = requests.post(url,
+                             headers=headers,
+                             params=params,
+                             files={'image': (image_filename,images_file,'image/jpeg')})   
+
 
 print response.status_code
 pprint(response.json())
@@ -3573,6 +3595,14 @@ data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP
 color_count | query | The maximum number of dominant colors to extract per image. | 3
 quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
 image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+
+Instead of the posting the image data you can also pass an image url.
+
+Parameter | Type | Description 
+--------- | ------- | ----------- 
+image_url | query | (**Required**) The image url.
+
+You can also pass the image using multipart/form-data with the fieldname `image`.
 
 ### Response 
 
