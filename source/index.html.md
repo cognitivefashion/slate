@@ -2256,6 +2256,7 @@ params = {}
 params['color_count'] = 3
 params['quality'] = 1
 params['image_max_dimension'] = 256
+params['ignore_background'] = 'false'
 
 # Catalog name.
 catalog_name = props['catalog_name']
@@ -2318,6 +2319,7 @@ catalog_name | path | (**Required**) The catalog name. |
 color_count | query | The maximum number of dominant colors to extract per image. | 3
 quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
 image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | false
 
 ### Response 
 
@@ -3646,6 +3648,7 @@ params = {}
 params['color_count'] = 3
 params['quality'] = 1
 params['image_max_dimension'] = 256
+params['ignore_background'] = 'false'
 
 api_endpoint = '/v1/colors/dominant_colors'
 
@@ -3767,6 +3770,7 @@ data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP
 color_count | query | The maximum number of dominant colors to extract per image. | 3
 quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
 image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | false
 
 Instead of the posting the image data you can also pass an image url.
 
