@@ -5063,88 +5063,118 @@ pprint(response.json())
 > Sample json response
 
 ```json
-{u'parse': {u'dimensions': {u'height': 496,
-                            u'number_of_channels': 3,
-                            u'original_height': 496,
-                            u'original_width': 372,
-                            u'resize_factor': 1.0,
-                            u'width': 372},
-            u'entities': {u'EntireImage': [{u'attributes': {u'age_gender': {u'CNN-HYDRA': {u'confidence': {u'boys': 8.963291001141981e-16,
-                                                                                                           u'girls': 9.555650493098256e-09,
-                                                                                                           u'kids': 7.271256421508543e-29,
-                                                                                                           u'men': 8.310367149988451e-08,
-                                                                                                           u'women': 0.9999998807907104},
-                                                                                           u'extra_attribute': False,
-                                                                                           u'value': u'women'}},
-                                                            u'ankle height': {u'CNN-HYDRA': {u'confidence': {u'ankle length': 0.9804659485816956,
-                                                                                                             u'calf length': 0.014615225605666637,
-                                                                                                             u'high ankle': 0.0001550178276374936,
-                                                                                                             u'low ankle': 0.003991052508354187,
-                                                                                                             u'mid ankle': 0.0007725586765445769},
-                                                                                             u'extra_attribute': False,
-                                                                                             u'value': u'ankle length'}},
-                                                            u'closing': {u'CNN-HYDRA': {u'confidence': {u'buckle': 0.26762887835502625,
-                                                                                                        u'lace-up': 0.04957474023103714,
-                                                                                                        u'slip on': 0.4985831677913666,
-                                                                                                        u'velcro': 0.03686698153614998,
-                                                                                                        u'zip': 0.145882248878479},
-                                                                                        u'extra_attribute': False,
-                                                                                        u'value': u'slip on'}},
-                                                            u'color': {u'CNN-HYDRA': {u'confidence': {u'black': 0.5809345245361328,
-                                                                                                      u'brown': 0.03913440182805061,
-                                                                                                      u'golden': 0.08500122278928757,
-                                                                                                      u'grey': 0.04689091071486473,
-                                                                                                      u'silver': 0.10020259022712708},
-                                                                                      u'extra_attribute': False,
-                                                                                      u'value': u'black'}},
-                                                            u'heel height': {u'CNN-HYDRA': {u'confidence': {u'flat: 0-1.5 inch': 0.00011825565889012069,
-                                                                                                            u'high: above 3.5 inch': 0.6064814925193787,
-                                                                                                            u'low: 1.5-2.5 inch': 0.008176162838935852,
-                                                                                                            u'medium: 2.5-3.5 inch': 0.3852241635322571},
-                                                                                            u'extra_attribute': False,
-                                                                                            u'value': u'high: above 3.5 inch'}},
-                                                            u'heel shape': {u'CNN-HYDRA': {u'confidence': {u'block': 0.00012550147948786616,
-                                                                                                           u'cone': 3.879075393342646e-06,
-                                                                                                           u'kitten': 0.0003877997223753482,
-                                                                                                           u'platform': 1.5389754480565898e-05,
-                                                                                                           u'stiletto': 0.9994674324989319},
-                                                                                           u'extra_attribute': False,
-                                                                                           u'value': u'stiletto'}},
-                                                            u'material': {u'CNN-HYDRA': {u'confidence': {u'canvas': 8.773859008215368e-07,
-                                                                                                         u'cotton': 1.898792470456101e-05,
-                                                                                                         u'leather': 0.16098126769065857,
-                                                                                                         u'polyester': 2.0253739421605133e-05,
-                                                                                                         u'polyurethane': 0.8389779925346375},
-                                                                                         u'extra_attribute': True,
-                                                                                         u'value': u'polyurethane'}},
-                                                            u'pump_type': {u'CNN-HYDRA': {u'confidence': {u'classic': 0.15818248689174652,
-                                                                                                          u'comfort': 0.14064711332321167,
-                                                                                                          u'evening': 0.1908372938632965,
-                                                                                                          u'kitten heel': 0.10779059678316116,
-                                                                                                          u'slingback': 0.16153603792190552},
-                                                                                          u'extra_attribute': True,
-                                                                                          u'value': u'evening'}},
-                                                            u'tip shape': {u'CNN-HYDRA': {u'confidence': {u'almond': 1.3935624338046182e-05,
-                                                                                                          u'closed': 3.12320509010533e-07,
-                                                                                                          u'open': 0.6662291884422302,
-                                                                                                          u'pointed': 0.20216183364391327,
-                                                                                                          u'round': 0.1315946727991104},
-                                                                                          u'extra_attribute': False,
-                                                                                          u'value': u'open'}},
-                                            u'bounding_box': {u'height': 495,
-                                                              u'score': 1.0,
-                                                              u'top_left_x': 0,
-                                                              u'top_left_y': 0,
-                                                              u'width': 371},
-                                            u'category': {u'CNN-HYDRA': {u'confidence': {u'boots': 0.005754747893661261,
-                                                                                         u'peep toes': 0.011904310435056686,
-                                                                                         u'pumps': 0.02747255750000477,
-                                                                                         u'sandals': 0.22344675660133362,
-                                                                                         u'stilettos': 0.7297826409339905},
-                                                                         u'value': u'stilettos'}},
-                                            u'id': u'0'}]},
-            u'image_path': u'/cognitive_fashion/data/uploaded_images/66df8d19-5a1c-4539-9b1b-cc35acf95fbc.jpe'},
- u'time_ms': u'2969.12'}
+{
+ "category": {
+  "CNN-HYDRA": {
+   "confidence": {
+    "peep toes": 0.011904310435056686, 
+    "stilettos": 0.7297826409339905, 
+    "sandals": 0.22344675660133362, 
+    "pumps": 0.02747255750000477, 
+    "boots": 0.005754747893661261
+   }, 
+   "value": "stilettos"
+  }
+ }, 
+ "time_ms": "618.91", 
+ "attributes": {
+  "fit": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "skinny": 0.011083225719630718, 
+     "regular": 0.947587251663208, 
+     "slim": 0.024282250553369522, 
+     "comfort": 0.006625995971262455, 
+     "narrow": 0.008856412954628468
+    }, 
+    "value": "regular"
+   }
+  }, 
+  "color": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "grey": 0.04689091071486473, 
+     "golden": 0.08500122278928757, 
+     "black": 0.5809345245361328, 
+     "silver": 0.10020259022712708, 
+     "brown": 0.03913440182805061
+    }, 
+    "value": "black"
+   }
+  }, 
+  "age_gender": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "boys": 8.963291001141981e-16, 
+     "women": 0.9999998807907104, 
+     "men": 8.310367149988451e-08, 
+     "girls": 9.555650493098256e-09, 
+     "kids": 7.271256421508543e-29
+    }, 
+    "value": "women"
+   }
+  }, 
+  "heel height": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "flat: 0-1.5 inch": 0.00011825565889012069, 
+     "medium: 2.5-3.5 inch": 0.3852241635322571, 
+     "low: 1.5-2.5 inch": 0.008176162838935852, 
+     "high: above 3.5 inch": 0.6064814925193787
+    }, 
+    "value": "high: above 3.5 inch"
+   }
+  }, 
+  "heel shape": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "platform": 1.5389754480565898e-05, 
+     "stiletto": 0.9994674324989319, 
+     "cone": 3.879075393342646e-06, 
+     "block": 0.00012550147948786616, 
+     "kitten": 0.0003877997223753482
+    }, 
+    "value": "stiletto"
+   }
+  }, 
+  "tip shape": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "pointed": 0.20216183364391327, 
+     "almond": 1.3935624338046182e-05, 
+     "open": 0.6662291884422302, 
+     "round": 0.1315946727991104, 
+     "closed": 3.12320509010533e-07
+    }, 
+    "value": "open"
+   }
+  }, 
+  "ankle height": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "calf length": 0.014615225605666637, 
+     "low ankle": 0.003991052508354187, 
+     "ankle length": 0.9804659485816956, 
+     "mid ankle": 0.0007725586765445769, 
+     "high ankle": 0.0001550178276374936
+    }, 
+    "value": "ankle length"
+   }
+  }, 
+  "closing": {
+   "CNN-HYDRA": {
+    "confidence": {
+     "lace-up": 0.04957474023103714, 
+     "slip on": 0.4985831677913666, 
+     "buckle": 0.26762887835502625, 
+     "zip": 0.145882248878479, 
+     "velcro": 0.03686698153614998
+    }, 
+    "value": "slip on"
+   }
+  }
+ }
+}
 ```
 
 ### End point
