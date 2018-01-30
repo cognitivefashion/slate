@@ -5011,19 +5011,19 @@ trend_forecast  | The trend score forecast (mean) for the color for the next sea
 
 # Complete the Look
 
-Given an fashion apparel suggest another apparel/accessory that goes well with it.
+Given a fashion apparel suggest another apparel/accessory that goes well with it.
 
 
 # Visual Attributes
 
-Given an fashion apparel image get the attributes associated with it.
+Given a fashion apparel image get the attributes associated with it.
 
 ## Get visual attributes
 
 ```python
 #------------------------------------------------------------------------------
 # Get visual attributes for a given uploaded image.
-# GET /v1/visualattributes/visualattributes
+# GET /v1/visualattributes/iconic
 #------------------------------------------------------------------------------
 
 import os
@@ -5046,7 +5046,7 @@ params = {}
 
 headers['Content-Type'] = 'image/jpeg'
 
-api_endpoint = '/v1/visualattributes/visualattributes'
+api_endpoint = '/v1/visualattributes/iconic'
 
 url = urljoin(api_gateway_url,api_endpoint)
 
@@ -5179,4 +5179,18 @@ pprint(response.json())
 
 ### End point
 
-`GET /v1/visualattributes/visualattributes`
+`GET /v1/visualattributes/iconic`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | -----------
+data | image/jpeg | (**Required**) The 3-channel image. The image can be in PNG, JPEG, BMP, or GIF.
+
+### Response
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken for prediction in milliseconds.
+category | The top-5 product categories predicted along with their respective confidence levels and the final predicted category.
+attributes | The attributes and their top-5 values predicted along with the respective confidence levels. The attributes predicted shall be consistent with the predicted category. Eg "sleeve length" won't be predicted along with 'jeans'.
