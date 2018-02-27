@@ -5008,20 +5008,28 @@ popularity_by_id_predicted | The predicted popularity score for the color strati
 popularity_forecast | The popularity score forecast (mean and 95% confidence interval) for the color for the next season. 
 trend_forecast  | The trend score forecast (mean) for the color for the next season. The colors are sorted by this value. 
 
-# Complete the Look
-
-Given a fashion apparel suggest another apparel/accessory that goes well with it.
-
-
 # Visual Attributes
 
-Given a fashion apparel image get the attributes associated with it.
+Given a fashion image (containing apparel,accessories,or footwear) identify the main product **category** along with the different **attributes**. The category and attributes are grounded in a standardized fashion taxonomy. 
 
-## Get visual attributes
+Some use cases for visual attributes include:
+
+- Auto-attribution of catalog images.
+- Catalog enrichment for a better text search.
+- Post-filtering of visual search results.
+
+<aside class="notice">
+We differentiate between two kinds of images. Iconic images are mainly single product images where the image is loosely focused only on the main apparel, footwear or accessory. Non-Iconic are mainly multiple product images where the image contains multiple apparel, footwear and accessories. Non-Iconic images are typically full outfit images whereas iconic images are mainly focused on the main product.
+</aside>
+
+
+## Get visual attributes for iconic images
+
+Given a iconic fashion image (containing apparel,accessories,or footwear) identify the main product **category** along with the different **attributes**. The attributes predicted shall be consistent with the predicted category, e.g. `sleeve length` won't be predicted for category `jeans`.
 
 ```python
 #------------------------------------------------------------------------------
-# Get visual attributes for a given uploaded image.
+# Get visual attributes for a given iconic image.
 # GET /v1/visualattributes/iconic
 #------------------------------------------------------------------------------
 
@@ -5043,16 +5051,36 @@ headers = {'X-Api-Key': props['X-Api-Key']}
 # Parameters.
 params = {}
 
-headers['Content-Type'] = 'image/jpeg'
-
 api_endpoint = '/v1/visualattributes/iconic'
 
 url = urljoin(api_gateway_url,api_endpoint)
 
+# Three options to pass the image
+
+# OPTION 1 : Directly post the image
+headers['Content-Type'] = 'image/jpeg'
 response = requests.post(url,
-                        headers=headers,
-                        params=params,
-                        data=open('test_image_1.jpeg','rb'))
+                         headers=headers,
+                         params=params,
+                         data=open('test_image_1.jpeg','rb'))
+
+"""            
+# OPTION 2 : Pass the image url
+params['image_url'] = 'http://vg-images.condecdn.net/image/oDXPOxw65EZ/crop/405'
+response = requests.post(url,
+                         headers=headers,
+                         params=params)
+"""
+
+"""
+# OPTION 3 : using multipart
+image_filename = 'test_image_1.jpeg'
+with open(image_filename,'rb') as images_file:
+    response = requests.post(url,
+                             headers=headers,
+                             params=params,
+                             files={'image': (image_filename,images_file,'image/jpeg')})   
+"""
 
 print response.status_code
 pprint(response.json())
@@ -5063,114 +5091,79 @@ pprint(response.json())
 
 ```json
 {
+  "time_ms": "570.49",
  "category": {
-  "CNN-HYDRA": {
-   "confidence": {
-    "peep toes": 0.011904310435056686, 
-    "stilettos": 0.7297826409339905, 
-    "sandals": 0.22344675660133362, 
-    "pumps": 0.02747255750000477, 
-    "boots": 0.005754747893661261
-   }, 
-   "value": "stilettos"
-  }
- }, 
- "time_ms": "618.91", 
+  "score": {
+   "stilettos": 0.7297826409339905,
+   "sandals": 0.22344675660133362,
+   "pumps": 0.02747255750000477
+  },
+  "value": "stilettos"
+ },
  "attributes": {
   "fit": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "skinny": 0.011083225719630718, 
-     "regular": 0.947587251663208, 
-     "slim": 0.024282250553369522, 
-     "comfort": 0.006625995971262455, 
-     "narrow": 0.008856412954628468
-    }, 
-    "value": "regular"
-   }
-  }, 
+   "score": {
+    "skinny": 0.011083225719630718,
+    "regular": 0.947587251663208,
+    "slim": 0.024282250553369522
+   },
+   "value": "regular"
+  },
   "color": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "grey": 0.04689091071486473, 
-     "golden": 0.08500122278928757, 
-     "black": 0.5809345245361328, 
-     "silver": 0.10020259022712708, 
-     "brown": 0.03913440182805061
-    }, 
-    "value": "black"
-   }
-  }, 
+   "score": {
+    "golden": 0.08500122278928757,
+    "black": 0.5809345245361328,
+    "silver": 0.10020259022712708
+   },
+   "value": "black"
+  },
   "age_gender": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "boys": 8.963291001141981e-16, 
-     "women": 0.9999998807907104, 
-     "men": 8.310367149988451e-08, 
-     "girls": 9.555650493098256e-09, 
-     "kids": 7.271256421508543e-29
-    }, 
-    "value": "women"
-   }
-  }, 
+   "score": {
+    "men": 8.310367149988451e-08,
+    "girls": 9.555650493098256e-09,
+    "women": 0.9999998807907104
+   },
+   "value": "women"
+  },
   "heel height": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "flat: 0-1.5 inch": 0.00011825565889012069, 
-     "medium: 2.5-3.5 inch": 0.3852241635322571, 
-     "low: 1.5-2.5 inch": 0.008176162838935852, 
-     "high: above 3.5 inch": 0.6064814925193787
-    }, 
-    "value": "high: above 3.5 inch"
-   }
-  }, 
+   "score": {
+    "medium: 2.5-3.5 inch": 0.3852241635322571,
+    "low: 1.5-2.5 inch": 0.008176162838935852,
+    "high: above 3.5 inch": 0.6064814925193787
+   },
+   "value": "high: above 3.5 inch"
+  },
   "heel shape": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "platform": 1.5389754480565898e-05, 
-     "stiletto": 0.9994674324989319, 
-     "cone": 3.879075393342646e-06, 
-     "block": 0.00012550147948786616, 
-     "kitten": 0.0003877997223753482
-    }, 
-    "value": "stiletto"
-   }
-  }, 
+   "score": {
+    "stiletto": 0.9994674324989319,
+    "block": 0.00012550147948786616,
+    "kitten": 0.0003877997223753482
+   },
+   "value": "stiletto"
+  },
   "tip shape": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "pointed": 0.20216183364391327, 
-     "almond": 1.3935624338046182e-05, 
-     "open": 0.6662291884422302, 
-     "round": 0.1315946727991104, 
-     "closed": 3.12320509010533e-07
-    }, 
-    "value": "open"
-   }
-  }, 
+   "score": {
+    "pointed": 0.20216183364391327,
+    "open": 0.6662291884422302,
+    "round": 0.1315946727991104
+   },
+   "value": "open"
+  },
   "ankle height": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "calf length": 0.014615225605666637, 
-     "low ankle": 0.003991052508354187, 
-     "ankle length": 0.9804659485816956, 
-     "mid ankle": 0.0007725586765445769, 
-     "high ankle": 0.0001550178276374936
-    }, 
-    "value": "ankle length"
-   }
-  }, 
+   "score": {
+    "calf length": 0.014615225605666637,
+    "low ankle": 0.003991052508354187,
+    "ankle length": 0.9804659485816956
+   },
+   "value": "ankle length"
+  },
   "closing": {
-   "CNN-HYDRA": {
-    "confidence": {
-     "lace-up": 0.04957474023103714, 
-     "slip on": 0.4985831677913666, 
-     "buckle": 0.26762887835502625, 
-     "zip": 0.145882248878479, 
-     "velcro": 0.03686698153614998
-    }, 
-    "value": "slip on"
-   }
+   "score": {
+    "buckle": 0.26762887835502625,
+    "slip on": 0.4985831677913666,
+    "zip": 0.145882248878479
+   },
+   "value": "slip on"
   }
  }
 }
@@ -5184,15 +5177,23 @@ pprint(response.json())
 
 Parameter | Type | Description | Default
 --------- | ------- | ----------- | -----------
-data | image/jpeg | (**Required**) The 3-channel image. The image can be in PNG, JPEG, BMP, or GIF.
+data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
+
+Instead of the posting the image data you can also pass an image url.
+
+Parameter | Type | Description 
+--------- | ------- | ----------- 
+image_url | query | (**Required**) The image url.
+
+You can also pass the image using multipart/form-data with the fieldname `image`.
 
 ### Response
 
 Parameter |  Description
 --------- |  -----------
 time_ms |  The time taken for prediction in milliseconds.
-category | The top-5 product categories predicted along with their respective confidence levels and the final predicted category.
-attributes | The attributes and their top-5 values predicted along with the respective confidence levels. The attributes predicted shall be consistent with the predicted category. Eg "sleeve length" won't be predicted along with 'jeans'.
+category | The top-3 product categories predicted along with their respective confidence levels and the final predicted category.
+attributes | The attributes and their top-3 values predicted along with the respective confidence levels. 
 
 # Person
 
@@ -5317,3 +5318,9 @@ width | The width of the bounding box.
 height | The height of the bounding box.
 score | The confidence score (between 0 and 1) that the bounding box contains a person.
 
+
+# Complete the Look
+
+Given a fashion apparel suggest another apparel/accessory that goes well with it.
+
+Coming soon ...
