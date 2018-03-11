@@ -6,10 +6,9 @@ language_tabs:
   - python
 
 toc_footers:
-  - <a href='https://www.ibm.com/us-en/marketplace/8075'>Sign up for an API key</a>
+  - <a href='https://cognitivefashion.github.io/'>Cognitive Fashion site</a>
   - <a href='https://github.com/cognitivefashion/cf-sdk-python'>Python SDK</a>
-  - <a href='https://www.ibm.com/us-en/marketplace/8075'>Cognitive Fashion site</a>
-
+  - <a href='https://www.ibm.com/us-en/marketplace/8075'>Request an API key</a>
 includes:
   - errors
   
@@ -18,7 +17,7 @@ search: true
 
 # IBM Research Cognitive Fashion 
 
-The [IBM Research Cognitive Fashion](https://www.ibm.com/us-en/marketplace/8075) project aims to build a suite of APIs for the fashion industry in order to enable an engaging shopping experience, primarily leveraging natural language and image understanding technologies together with other cognitive capabilities. Developers/in-house IT team can use these APIs to build their own applications. Central to this is a curated domain specific taxonomy/knowledge graph, fashion related content and text/image annotators tuned to the domain of fashion. 
+The [IBM Research Cognitive Fashion](https://cognitivefashion.github.io/) project aims to build a suite of APIs for the fashion industry in order to enable an engaging shopping experience, primarily leveraging natural language and image understanding technologies together with other cognitive capabilities. Developers/in-house IT team can use these APIs to build their own applications. Central to this is a curated domain specific taxonomy/knowledge graph, fashion related content and text/image annotators tuned to the domain of fashion. 
 
 [Python SDK](https://github.com/cognitivefashion/cf-sdk-python)
 
@@ -2255,7 +2254,9 @@ params = {}
 params['color_count'] = 3
 params['quality'] = 1
 params['image_max_dimension'] = 256
-params['ignore_background'] = 'false'
+params['ignore_background'] = 'true'
+params['model'] = 'person_fast'
+params['fraction_pixels_threshold'] = 0.1
 
 # Catalog name.
 catalog_name = props['catalog_name']
@@ -2303,7 +2304,7 @@ Build the color search index.
 Before you can start using the color search APIs the color search index has to be built. This API computes the dominant colors for all the uploaded images in the catalog and then builds an index for fast nearest neighbor retrieval.
 
 <aside class="notice">
-This is a one time long running operation. Currently it takes around 200-500 milliseconds to compute the dominant colors for one image. Depending on your catalog size you will have to wait till the index creation is completed to start using the color search APIs. You can query the status of the index creation using the GET endpoint. The index is built when the status changes to `done`
+This is a one time long running operation. Depending on your catalog size you will have to wait till the index creation is completed to start using the color search APIs. You can query the status of the index creation using the GET endpoint. The index is built when the status changes to `done`
 </aside>
 
 ### End point
@@ -2318,7 +2319,9 @@ catalog_name | path | (**Required**) The catalog name. |
 color_count | query | The maximum number of dominant colors to extract per image. | 3
 quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
 image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
-ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | false
+ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | `false`
+model | query | The model to use to ignore the background. Currently we use person detecors to focus only on the person. The following options are supported `person_fast` (faster but slightly less accurate model), `person_accurate` (slower but more accurate model) and `person_basic` (a basic person detector using standard body proportions). | `person_fast`
+fraction_pixels_threshold | query | Include only those colors whos fraction of pixels is greater than this number. | 0.0
 
 ### Response 
 
@@ -2567,42 +2570,67 @@ pprint(response.json())
 
 ```json
 {
- "time_ms": "98.54",
+ "time_ms": "6.13",
  "products": [
   {
-   "distance": 51.557655334472656,
-   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
+   "distance": 7.383520126342773,
+   "image_id": "5",
+   "rgb": [
+    197,
+    99,
+    71
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg"
+  },
+  {
+   "distance": 9.618025779724121,
+   "image_id": "1",
+   "rgb": [
+    196,
+    106,
+    76
+   ],
    "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "1"
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg"
   },
   {
-   "distance": 53.42538833618164,
-   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "distance": 12.06448745727539,
+   "image_id": "4",
+   "rgb": [
+    154,
+    46,
+    35
+   ],
    "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "4"
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg"
   },
   {
-   "distance": 59.01533126831055,
-   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "distance": 19.470752716064453,
+   "image_id": "2",
+   "rgb": [
+    128,
+    41,
+    38
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "5"
+   "image_filename": "SHRES16AWFSDR9346B_2.jpg"
   },
   {
-   "distance": 67.46210479736328,
-   "image_filename": "SHRES16AWFSDR9346A_1.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346A54/Look_Medium.jpg",
-   "id": "SHRES16AWFSDR9346A",
-   "image_id": "1"
-  },
-  {
-   "distance": 67.5510482788086,
-   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "distance": 20.736268997192383,
+   "image_id": "4",
+   "rgb": [
+    192,
+    126,
+    96
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "5"
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg"
   }
  ]
 }
@@ -2696,42 +2724,67 @@ pprint(response.json())
 
 ```json
 {
- "time_ms": "214.84",
+ "time_ms": "11.09",
  "products": [
   {
-   "distance": 51.557655334472656,
-   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
-   "id": "SHRES16AWFSDR9346B",
-   "image_id": "1"
-  },
-  {
-   "distance": 53.42538833618164,
-   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "distance": 51.287628173828125,
+   "image_id": "4",
+   "rgb": [
+    154,
+    46,
+    35
+   ],
    "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "4"
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg"
   },
   {
-   "distance": 59.01533126831055,
-   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
+   "distance": 53.020751953125,
+   "image_id": "5",
+   "rgb": [
+    197,
+    99,
+    71
+   ],
    "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "5"
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg"
   },
   {
-   "distance": 67.46210479736328,
-   "image_filename": "SHRES16AWFSDR9346A_1.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346A54/Look_Medium.jpg",
-   "id": "SHRES16AWFSDR9346A",
-   "image_id": "1"
-  },
-  {
-   "distance": 67.5510482788086,
-   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
+   "distance": 56.67232894897461,
+   "image_id": "1",
+   "rgb": [
+    196,
+    106,
+    76
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "5"
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg"
+  },
+  {
+   "distance": 64.99003601074219,
+   "image_id": "2",
+   "rgb": [
+    128,
+    41,
+    38
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_filename": "SHRES16AWFSDR9346B_2.jpg"
+  },
+  {
+   "distance": 67.47423553466797,
+   "image_id": "2",
+   "rgb": [
+    210,
+    138,
+    106
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_filename": "SHRES16AWFSDR9346B_2.jpg"
   }
  ]
 }
@@ -2823,42 +2876,67 @@ pprint(response.json())
 
 ```json
 {
- "time_ms": "25.82",
+ "time_ms": "12.31",
  "products": [
   {
    "distance": 0.0,
-   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
+   "image_id": "1",
+   "rgb": [
+    196,
+    106,
+    76
+   ],
    "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "1"
+   "image_filename": "SHRES16AWFSDR9346B_1.jpg"
   },
   {
-   "distance": 0.0,
-   "image_filename": "SHRES16AWFSDR9346B_2.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
+   "distance": 4.095544338226318,
+   "image_id": "5",
+   "rgb": [
+    197,
+    99,
+    71
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "2"
+   "image_filename": "SHRES16AWFSDR9346B_5.jpg"
   },
   {
-   "distance": 0.35167253017425537,
-   "image_filename": "LPJNA16AMDMTE91662_2.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2016/LPJNA16AMDMTE9166200/Right_Medium.jpg",
-   "id": "LPJNA16AMDMTE91662",
-   "image_id": "2"
-  },
-  {
-   "distance": 0.629985511302948,
-   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
+   "distance": 12.966226577758789,
+   "image_id": "4",
+   "rgb": [
+    192,
+    126,
+    96
+   ],
    "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
    "id": "SHRES16AWFSDR9346B",
-   "image_id": "4"
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg"
   },
   {
-   "distance": 0.6313580870628357,
-   "image_filename": "LPJNA16AMDMTE91662_1.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2016/LPJNA16AMDMTE9166200/Front_Medium.jpg",
-   "id": "LPJNA16AMDMTE91662",
-   "image_id": "1"
+   "distance": 13.747275352478027,
+   "image_id": "2",
+   "rgb": [
+    210,
+    138,
+    106
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_filename": "SHRES16AWFSDR9346B_2.jpg"
+  },
+  {
+   "distance": 21.508577346801758,
+   "image_id": "4",
+   "rgb": [
+    154,
+    46,
+    35
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
+   "id": "SHRES16AWFSDR9346B",
+   "image_filename": "SHRES16AWFSDR9346B_4.jpg"
   }
  ]
 }
@@ -2951,42 +3029,67 @@ pprint(response.json())
 
 ```json
 {
- "time_ms": "1069.26",
+ "time_ms": "689.53",
  "products": [
   {
-   "distance": 21.60784339904785,
-   "image_filename": "SHRES16AWFSDR9346B_1.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Look_Medium.jpg",
-   "id": "SHRES16AWFSDR9346B",
-   "image_id": "1"
+   "distance": 1.9539705514907837,
+   "image_id": "4",
+   "rgb": [
+    48,
+    48,
+    48
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/SKLTS16AMCWSH8SH2005/Look_Medium.jpg",
+   "id": "SKLTS16AMCWSH8SH20",
+   "image_filename": "SKLTS16AMCWSH8SH20_4.jpg"
   },
   {
-   "distance": 22.59739112854004,
-   "image_filename": "SHRES16AWFSDR9346B_4.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Right_Medium.jpg",
-   "id": "SHRES16AWFSDR9346B",
-   "image_id": "4"
+   "distance": 4.879070281982422,
+   "image_id": "5",
+   "rgb": [
+    45,
+    42,
+    45
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/SKLTS16AMCWSH8SP0150/Right_Medium.jpg",
+   "id": "SKLTS16AMCWSH8SP01",
+   "image_filename": "SKLTS16AMCWSH8SP01_5.jpg"
   },
   {
-   "distance": 28.862674713134766,
-   "image_filename": "SHRES16AWFSDR9346B_5.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Front_Medium.jpg",
-   "id": "SHRES16AWFSDR9346B",
-   "image_id": "5"
+   "distance": 6.080552577972412,
+   "image_id": "2",
+   "rgb": [
+    42,
+    40,
+    44
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/SKLTS16AMCWSH8SP0150/Front_Medium.jpg",
+   "id": "SKLTS16AMCWSH8SP01",
+   "image_filename": "SKLTS16AMCWSH8SP01_2.jpg"
   },
   {
-   "distance": 36.39692306518555,
-   "image_filename": "SHRES16AWFSDR9346A_1.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346A54/Look_Medium.jpg",
-   "id": "SHRES16AWFSDR9346A",
-   "image_id": "1"
+   "distance": 6.821847438812256,
+   "image_id": "3",
+   "rgb": [
+    40,
+    38,
+    42
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/SKLTS16AMCWSH8SP0150/Left_Medium.jpg",
+   "id": "SKLTS16AMCWSH8SP01",
+   "image_filename": "SKLTS16AMCWSH8SP01_3.jpg"
   },
   {
-   "distance": 37.1317138671875,
-   "image_filename": "SHRES16AWFSDR9346B_2.jpg",
-   "image_url": "http://images.abofcdn.com/catalog/images/2015/SHRES16AWFSDR9346B18/Left_Medium.jpg",
-   "id": "SHRES16AWFSDR9346B",
-   "image_id": "2"
+   "distance": 7.602819442749023,
+   "image_id": "4",
+   "rgb": [
+    36,
+    34,
+    34
+   ],
+   "image_url": "http://images.abofcdn.com/catalog/images/2016/SKLTS16AMCWSH8SP0150/Look_Medium.jpg",
+   "id": "SKLTS16AMCWSH8SP01",
+   "image_filename": "SKLTS16AMCWSH8SP01_4.jpg"
   }
  ]
 }
@@ -3012,7 +3115,7 @@ data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG,
 max_number_of_results | query | maximum number of results to return | 12
 color_count | path | The maximum number of dominant colors to search for in an image. | 1
 image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your image is of high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
-rgb | The RGB value of the matching color.
+
                 
 ### Response 
 
@@ -3025,10 +3128,234 @@ id | The product id.
 image_filename | The image filename.
 image_url | The image url
 distance | The euclidean distance (in LAB space)  between the color in the image to the color in the query.
+rgb | The RGB value of the matching color.
 
 # Dominant Colors
 
-A collection of APIs for computing the dominant colors for the catalog.
+A collection of APIs for computing the dominant colors for an user uploaded image, the entire catalog, and any image in the catalog.
+
+## Get dominant colors for an image
+
+```python
+#------------------------------------------------------------------------------
+# Dominant Colors for an image. 
+# POST /v1/colors/dominant_colors
+#------------------------------------------------------------------------------
+
+import os
+import json
+import requests
+from urlparse import urljoin
+from pprint import pprint
+
+from props import *
+
+# Replace this with the custom url generated for you.
+api_gateway_url = props['api_gateway_url']
+
+# Pass the api key into the header
+# Replace 'your_api_key' with your API key.
+headers = {'X-Api-Key': props['X-Api-Key']}
+
+params = {}
+
+# Optional parameters.
+params['color_count'] = 3
+params['quality'] = 1
+params['image_max_dimension'] = 256
+params['ignore_background'] = 'true'
+params['model'] = 'person_fast'
+
+api_endpoint = '/v1/colors/dominant_colors'
+
+url = urljoin(api_gateway_url,api_endpoint)
+
+# Three options to pass the image
+
+# OPTION 1 : Directly post the image
+headers['Content-Type'] = 'image/jpeg'
+response = requests.post(url,
+                         headers=headers,
+                         params=params,
+                         data=open('test_image_2.jpeg','rb'))
+
+"""          
+# OPTION 2 : Pass the image url
+params['image_url'] = 'https://vg-images.condecdn.net/image/oDXPOxw65EZ/crop/405'
+response = requests.post(url,
+                         headers=headers,
+
+
+# OPTION 3 : using multipart
+image_filename = 'test_image_2.jpeg'
+with open(image_filename,'rb') as images_file:
+    response = requests.post(url,
+                             headers=headers,
+                             params=params,
+                             files={'image': (image_filename,images_file,'image/jpeg')})   
+""" 
+
+print response.status_code
+pprint(response.json())
+```
+
+> Sample json response
+
+```json
+{
+ "dominant_colors": [
+  {
+   "name": "light hot pink",
+   "hex": "#fab7e3",
+   "universal_name": "pink",
+   "rgb": [
+    250,
+    183,
+    227
+   ],
+   "hsv": [
+    320.5970149253731,
+    0.268,
+    0.9803921568627451
+   ],
+   "pantone": "pantone",
+   "fraction_pixels": 0.5424067052484534,
+   "entrylevel_name": "pink"
+  },
+  {
+   "name": "sunset orange",
+   "hex": "#f86754",
+   "universal_name": "red",
+   "rgb": [
+    248,
+    103,
+    84
+   ],
+   "hsv": [
+    6.9512195121951095,
+    0.6612903225806452,
+    0.9725490196078431
+   ],
+   "pantone": "pantone",
+   "fraction_pixels": 0.2895629614847336,
+   "entrylevel_name": "tomato"
+  },
+  {
+   "name": "carmine pink",
+   "hex": "#ed4d45",
+   "universal_name": "red",
+   "rgb": [
+    237,
+    77,
+    69
+   ],
+   "hsv": [
+    2.857142857142833,
+    0.7088607594936709,
+    0.9294117647058824
+   ],
+   "pantone": "pantone",
+   "fraction_pixels": 0.1578527240071842,
+   "entrylevel_name": "tomato"
+  },
+  {
+   "name": "pale violet-red",
+   "hex": "#e27997",
+   "universal_name": "pink",
+   "rgb": [
+    226,
+    121,
+    151
+   ],
+   "hsv": [
+    342.85714285714283,
+    0.46460176991150437,
+    0.8862745098039215
+   ],
+   "pantone": "pantone",
+   "fraction_pixels": 0.009778487327878668,
+   "entrylevel_name": "maroon"
+  },
+  {
+   "name": "mountbatten pink",
+   "hex": "#9c7084",
+   "universal_name": "gray",
+   "rgb": [
+    156,
+    112,
+    132
+   ],
+   "hsv": [
+    332.72727272727275,
+    0.28205128205128216,
+    0.611764705882353
+   ],
+   "pantone": "pantone",
+   "fraction_pixels": 0.0003991219317501497,
+   "entrylevel_name": "gray"
+  }
+ ],
+ "time_ms": "3165.92",
+ "bounding_box": {
+  "width": 246,
+  "score": 0.720421,
+  "top_left_x": 159,
+  "top_left_y": 0,
+  "height": 638,
+  "model": "person_fast"
+ }
+}
+```
+
+Get the dominant colors for an image.
+
+### End point
+
+`POST /v1/colors/dominant_colors`
+
+### Request
+
+Parameter | Type | Description | Default
+--------- | ------- | ----------- | ----------- 
+data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
+color_count | query | The maximum number of dominant colors to extract per image. | 3
+quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
+image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
+ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | `false`
+model | query | The model to use to ignore the background. Currently we use person detecors to focus only on the person. The following options are supported `person_fast` (faster but slightly less accurate model), `person_accurate` (slower but more accurate model) and `person_basic` (a basic person detector using standard body proportions). | `person_fast`   
+
+Instead of the posting the image data you can also pass an image url.
+
+Parameter | Type | Description 
+--------- | ------- | ----------- 
+image_url | query | (**Required**) The image url.
+
+You can also pass the image using multipart/form-data with the fieldname `image`.
+
+### Response 
+
+Parameter |  Description
+--------- |  -----------
+time_ms |  The time taken in milliseconds.
+**dominant_colors** |  A list of dominant colors for the image sorted in the decreasing order of the fraction of pixels. Each field in the list has the following fieldnames.
+rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
+hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
+hex | The hex code for the color.
+universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
+entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
+name | The best guess for the color name based on all the colors available in our color taxonomy.
+fraction_pixels | The fraction of pixels in the bounding box that can be attributed to this color.
+**bounding_box** | The region in the image used to compute the dominant colors and corresponds to the the bounding box for the central detected person. In case `ignore_background` is set to `false` this corresponds to the entire image.
+top_left_x | The x co-ordinate of the top left corner of the bounding box.
+top_left_y | The y co-ordinate of the top left corner of the bounding box.
+width | The width of the bounding box.
+height | The height of the bounding box.
+score | The confidence score (between 0 and 1) that the bounding box contains a person.
+model | The person detection model used.
+
+<aside class="warning">
+If the person detector is unable to detect any person in the image then we backoff to the person_basic model. 
+</aside>
 
 ## Build dominant colors index
 
@@ -3058,6 +3385,7 @@ params = {}
 # Optional parameters.
 params['colors'] = 20
 params['max_colors_per_image'] = 2
+params['fraction_pixels_threshold'] = 0.1
 
 # Catalog name.
 catalog_name = props['catalog_name']
@@ -3117,6 +3445,7 @@ Parameter | Type | Description | Default
 catalog_name | path | (**Required**) The catalog name. |
 colors | query | The number of dominant colors to compute. | 10
 max_colors_per_image | query | The maximum number of dominant colors to use per image. | all available colors
+fraction_pixels_threshold | query | Include only those colors whos fraction of pixels is greater than this number. | 0.0
 
 ### Response 
 
@@ -3516,70 +3845,83 @@ pprint(response.json())
 {
  "dominant_colors": [
   {
-   "name": "platinum",
-   "hex": "#eae5e1",
-   "universal_name": "white",
-   "lab": [
-    91.21959480157497,
-    0.9891444931204307,
-    2.535346529827587
-   ],
-   "rgb": [
-    234,
-    229,
-    225
-   ],
-   "hsv": [
-    26.666666666666742,
-    0.038461538461538436,
-    0.9176470588235294
-   ],
-   "entrylevel_name": "white"
-  },
-  {
-   "name": "carrot orange",
-   "hex": "#f49023",
+   "name": "nude",
+   "hex": "#ddb2a1",
    "universal_name": "orange",
    "lab": [
-    68.97150523958666,
-    30.7687372058737,
-    67.65927525225112
+    75.93883920123875,
+    13.100370410375927,
+    14.588739567429187
    ],
    "rgb": [
-    244,
-    144,
-    35
+    221,
+    178,
+    161
    ],
    "hsv": [
-    31.291866028708114,
-    0.8565573770491803,
-    0.9568627450980393
+    17.0,
+    0.2714932126696833,
+    0.8666666666666667
    ],
-   "entrylevel_name": "orange"
+   "pantone": "pantone",
+   "fraction_pixels": 0.7135929254029383,
+   "entrylevel_name": "peach"
   },
   {
-   "name": "cinnamon",
-   "hex": "#d16718",
-   "universal_name": "orange",
+   "name": "sweet brown",
+   "hex": "#a73128",
+   "universal_name": "red",
    "lab": [
-    55.405269947627616,
-    37.53890699256518,
-    58.230572519589465
+    38.84195845581349,
+    47.61794653096749,
+    33.289070729609406
    ],
    "rgb": [
-    209,
-    103,
-    24
+    167,
+    49,
+    40
    ],
    "hsv": [
-    25.621621621621614,
-    0.8851674641148325,
-    0.8196078431372549
+    4.251968503937007,
+    0.7604790419161677,
+    0.6549019607843137
    ],
-   "entrylevel_name": "copper"
+   "pantone": "pantone",
+   "fraction_pixels": 0.1621737270004279,
+   "entrylevel_name": "maroon"
+  },
+  {
+   "name": "myrtle green",
+   "hex": "#41736e",
+   "universal_name": "gray",
+   "lab": [
+    44.95622132993401,
+    -18.165188753450522,
+    -2.52470606261348
+   ],
+   "rgb": [
+    65,
+    115,
+    110
+   ],
+   "hsv": [
+    174.0,
+    0.4347826086956522,
+    0.45098039215686275
+   ],
+   "pantone": "pantone",
+   "fraction_pixels": 0.12423334759663386,
+   "entrylevel_name": "teal"
   }
  ],
- "time_ms": "1.90"
+ "time_ms": "1.99",
+ "bounding_box": {
+  "width": 83,
+  "score": 0.553035,
+  "top_left_x": 109,
+  "top_left_y": 75,
+  "height": 266
+ }
 }
 ```
 
@@ -3614,187 +3956,12 @@ hex | The hex code for the color.
 universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
 entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
 name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
-popularity | A score between 0 and 1 indicating the popularity of the color.
-popularity_percentile | The corresponding percentile score.
-n_instances | The number of colors in the cluster.
-
-## Get dominant colors for an image
-
-```python
-#------------------------------------------------------------------------------
-# Dominant color palette. 
-# POST /v1/colors/dominant_colors
-#------------------------------------------------------------------------------
-
-import os
-import json
-import requests
-from urlparse import urljoin
-from pprint import pprint
-
-from props import *
-
-# Replace this with the custom url generated for you.
-api_gateway_url = props['api_gateway_url']
-
-# Pass the api key into the header
-# Replace 'your_api_key' with your API key.
-headers = {'X-Api-Key': props['X-Api-Key']}
-
-params = {}
-
-# Optional parameters.
-params['color_count'] = 3
-params['quality'] = 1
-params['image_max_dimension'] = 256
-params['ignore_background'] = 'false'
-
-api_endpoint = '/v1/colors/dominant_colors'
-
-url = urljoin(api_gateway_url,api_endpoint)
-
-# Three options to pass the image
-
-# OPTION 1 : Directly post the image
-headers['Content-Type'] = 'image/jpeg'
-response = requests.post(url,
-                         headers=headers,
-                         params=params,
-                         data=open('test_image_2.jpeg','rb'))
-
-
-# OPTION 2 : Pass the image url
-params['image_url'] = 'http://vg-images.condecdn.net/image/oDXPOxw65EZ/crop/405'
-response = requests.post(url,
-                         headers=headers,
-                         params=params)
-                         
-# OPTION 3 : using multipart
-image_filename = 'test_image_2.jpeg'
-with open(image_filename,'rb') as images_file:
-    response = requests.post(url,
-                             headers=headers,
-                             params=params,
-                             files={'image': (image_filename,images_file,'image/jpeg')})   
-
-
-print response.status_code
-pprint(response.json())
-```
-
-> Sample json response
-
-```json
-{
- "dominant_colors": [
-  {
-   "name": "lavender blush",
-   "hex": "#f7e8f2",
-   "universal_name": "white",
-   "lab": [
-    93.40649747006204,
-    6.792207586509836,
-    -3.019243619029366
-   ],
-   "rgb": [
-    247,
-    232,
-    242
-   ],
-   "hsv": [
-    320.00000000000006,
-    0.06072874493927127,
-    0.9686274509803922
-   ],
-   "entrylevel_name": "off white"
-  },
-  {
-   "name": "carmine pink",
-   "hex": "#ed574b",
-   "universal_name": "red",
-   "lab": [
-    57.398596108439904,
-    57.08313749589916,
-    37.966663400202684
-   ],
-   "rgb": [
-    237,
-    87,
-    75
-   ],
-   "hsv": [
-    4.444444444444457,
-    0.6835443037974683,
-    0.9294117647058824
-   ],
-   "entrylevel_name": "tomato"
-  },
-  {
-   "name": "old burgundy",
-   "hex": "#483431",
-   "universal_name": "black",
-   "lab": [
-    23.854492807791047,
-    8.487853036308863,
-    5.404592036438394
-   ],
-   "rgb": [
-    72,
-    52,
-    49
-   ],
-   "hsv": [
-    7.826086956521749,
-    0.3194444444444444,
-    0.2823529411764706
-   ],
-   "entrylevel_name": "black"
-  }
- ],
- "time_ms": "1226.92"
-}
-```
-
-Get the dominant color palette for an image.
-
-### End point
-
-`POST /v1/colors/dominant_colors`
-
-### Request
-
-Parameter | Type | Description 
---------- | ------- | ----------- 
-data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
-color_count | query | The maximum number of dominant colors to extract per image. | 3
-quality | query | This parameter provides a trade off between the computation time and the quality of the dominant colors. Larger the number faster is the dominant color computation but greater the chance that the colors will be missed. 1 is the highest quality. | 1
-image_max_dimension | query | You can set this parameters to resize the image for faster computation of dominant colors. If your images are of very high resolution you can set this parameter to a smaller value (suggested values 256-512) for faster computation. For any image if max(image width,image height) > image_max_dimension resizes the image such that max(image width,image height) = image_max_dimension. | no image resizing
-ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | false
-
-Instead of the posting the image data you can also pass an image url.
-
-Parameter | Type | Description 
---------- | ------- | ----------- 
-image_url | query | (**Required**) The image url.
-
-You can also pass the image using multipart/form-data with the fieldname `image`.
-
-### Response 
-
-Parameter |  Description
---------- |  -----------
-time_ms |  The time taken in milliseconds.
-computed_on | The time the dominant colors where computed.
-**dominant_colors** |  A list of dominant colors for the catalog sorted in the decreasing order of popularity. Each field in the list has the following fieldnames.
-rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
-hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
-hex | The hex code for the color.
-universal_name | The best matching universal color name. Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
-entrylevel_name | The best matching entry level color name. A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
-name | The best guess for the color name based on all the colors avaialable in our color taxonomy.
-popularity | A score between 0 and 1 indicating the popularity of the color.
-popularity_percentile | The corresponding percentile score.
-n_instances | The number of colors in the cluster.
+**bounding_box** | The region in the image used to compute the dominant colors and corresponds to the the bounding box for the central detected person.
+top_left_x | The x co-ordinate of the top left corner of the bounding box.
+top_left_y | The y co-ordinate of the top left corner of the bounding box.
+width | The width of the bounding box.
+height | The height of the bounding box.
+score | The confidence score (between 0 and 1) that the bounding box contains a person.
 
 # Color Trends
 
@@ -3916,6 +4083,7 @@ report_name | path | (**Required**) The report name. Every trend analysis is ref
 catalog_names | query | (**Required**) A time ordered list of catalog names. Pass the catalog names as a comma separated list of names, for example, `catalog_names=vogue-autumn-winter-2014,vogue-autumn-winter-2015,vogue-autumn-winter-2016,vogue-autumn-winter-2017`. Note that these catalog have to be ingested and the color search index has to be computed for each of the catalog. It is important to pass the catalog names in the right time order.|
 colors | query | The number of clusters to use in the analysis. The poularity sscore is computed for every cluster. | 10
 max_colors_per_image | query | The maximum number of dominant colors to use per image. | all available colors
+fraction_pixels_threshold | query | Include only those colors whos fraction of pixels is greater than this number. | 0.0
 
 ### Response 
 
