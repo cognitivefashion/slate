@@ -10,6 +10,7 @@ toc_footers:
   - <a href='https://github.com/cognitivefashion/cf-sdk-python'>Python SDK</a>
   - <a href='https://www.ibm.com/us-en/marketplace/8075'>Request an API key</a>
 includes:
+  - textsearch
   - errors
   
 search: true
