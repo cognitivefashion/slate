@@ -1,29 +1,32 @@
 ---
-title: IBM Research Cognitive Fashion API Reference
+title: IBM Research AI for Fashion API Reference
 
 language_tabs:
   - shell
   - python
 
 toc_footers:
-  - <a href='https://cognitivefashion.github.io/'>Cognitive Fashion site</a>
+  - <a href='https://cognitivefashion.github.io/'>Project Website</a>
   - <a href='https://github.com/cognitivefashion/cf-sdk-python'>Python SDK</a>
-  - <a href='https://www.ibm.com/us-en/marketplace/8075'>Request an API key</a>
+  - <a href='mailto:viraykar@in.ibm.com?Subject=AI%20%20for%20Fashion%20API%20key'>Request an API key</a>
 includes:
   - textsearch
+  - dominantprints
   - errors
   
 search: true
 ---
 
-# IBM Research Cognitive Fashion 
+# IBM Research AI for Fashion 
 
-The [IBM Research Cognitive Fashion](https://cognitivefashion.github.io/) project aims to build a suite of APIs for the fashion industry in order to enable an engaging shopping experience, primarily leveraging natural language and image understanding technologies together with other cognitive capabilities. Developers/in-house IT team can use these APIs to build their own applications. Central to this is a curated domain specific taxonomy/knowledge graph, fashion related content and text/image annotators tuned to the domain of fashion. 
+The [IBM Research AI for fashion](https://cognitivefashion.github.io/) project aims to build a suite of APIs for the fashion industry primarily leveraging deep learning, natural language processing and computer vision. 
+
+The usecases are targeted towards end consumers, online retailers, buyers, merchandisers and designers. Developers/in-house IT team can use these APIs to build their own applications. Central to this is a curated domain specific taxonomy/knowledge graph, fashion related content and text/image annotators tuned to the domain of fashion. 
 
 [Python SDK](https://github.com/cognitivefashion/cf-sdk-python)
 
 <aside class="notice">
-<b>IBM fashion taxonomy</b> is a semi-automatically curated comprehensive hierarchical fashion taxonomy for apparel, footwear, and accessories along with their attributes and relations. The taxonomy is curated from several fashion resources and then hand tuned by domain experts. All the APIs below leverage this fashion taxonomy. Fashion evolves constantly and hence IBM fashion taxonomy is dynamically updated at regular intervals to include the current fashion terms and trends. The user will always have access to the latest fashion taxonomy when using any of these APIs.
+Our <b>fashion taxonomy</b> is a semi-automatically curated comprehensive hierarchical fashion taxonomy for apparel, footwear, and accessories along with their attributes and relations. The taxonomy is curated from several fashion resources and then hand tuned by domain experts. All the APIs below leverage this fashion taxonomy. Fashion evolves constantly and hence IBM fashion taxonomy is dynamically updated at regular intervals to include the current fashion terms and trends. The user will always have access to the latest fashion taxonomy when using any of these APIs.
 </aside>
 
 # Authentication
@@ -56,7 +59,7 @@ response = requests.get(url,params=payload)
 
 > Make sure to replace `your_api_key` with your API key.
 
-Cognitive Fashion uses API keys to allow access to the API. You can request for a API key here at our [portal](https://www.ibm.com/us-en/marketplace/8075). Once you sign up you will get a custom url and an API key. The API key has to be included in all API requests to the server. 
+Cognitive Fashion uses API keys to allow access to the API. The API key has to be included in all API requests to the server. 
 
 The preferred way is to include it in a header that looks like the following:
 
