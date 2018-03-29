@@ -22,6 +22,8 @@ includes:
   - colortrends
   - printsearch
   - dominantprints
+  - lookssearch
+  - dominantlooks
   - ctl
   - errors
   
