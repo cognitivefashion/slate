@@ -7,6 +7,7 @@ A **color term**, also known as a color name, is a word or phrase that refers to
 - **universal** Berlin and Kay, in a classic [study](https://en.wikipedia.org/wiki/Basic_Color_Terms:_Their_Universality_and_Evolution) of worldwide color naming, postulated the existence of *11 universal basic color terms* across languages. We have included two more colors(*olive* and *yellow green*) as per the [ISCC-NBS system](https://en.wikipedia.org/wiki/ISCC%E2%80%93NBS_system).
 - **entrylevel** A slightly larger curated set of color names which we call *entry level*. A random person should be able to recognize these color names.
 - **full** The full set of colors available in our color taxonomy including more esoteric color terms.
+- **pantone** The pantone color terms for fashion.
 
 Color similarities are computed using the [Delta E (CIE2000)](https://en.wikipedia.org/wiki/Color_difference) metric in the LAB space.
 
@@ -22,6 +23,7 @@ import os
 import json
 import requests
 from urlparse import urljoin
+from pprint import pprint
 
 from props import *
 
@@ -36,57 +38,37 @@ api_endpoint = '/v1/colors/color_terms'
 
 url = urljoin(api_gateway_url,api_endpoint)
 
+# Parameters - required
 params = {}
 params['r'] = 106
 params['g'] = 103
 params['b'] = 95
 
+# Parameters - optional
+#params['color_count'] = 3
+#params['color_family'] = 'full'
+#params['color_family'] = 'pantone'
+
 response = requests.get(url,headers=headers,params=params)
 
 print response.status_code
-print response.json()
+pprint(response.json())
 ```
 
 > Sample json response
 
 ```json
 {
- "time_ms": "250.63",
+ "time_ms": "234.64",
  "color_terms": [
   {
-   "name": "papaya",
-   "hex": "#645e54",
-   "universal_name": "gray",
-   "rgb": [
-    100,
-    94,
-    84
-   ],
-   "hsv": [
-    37.5,
-    0.16000000000000003,
-    0.39215686274509803
-   ],
-   "entrylevel_name": "gray"
-  },
-  {
-   "name": "granite gray",
-   "hex": "#676767",
-   "universal_name": "gray",
-   "rgb": [
-    103,
+   "name": "dim gray",
+   "pantone_rgb": [
+    104,
     103,
     103
    ],
-   "hsv": [
-    0.0,
-    0.0,
-    0.403921568627451
-   ],
-   "entrylevel_name": "gray"
-  },
-  {
-   "name": "dim gray",
+   "pantone_id": "pantone 18-0503 tcx gargoyle",
    "hex": "#696969",
    "universal_name": "gray",
    "rgb": [
@@ -99,45 +81,63 @@ print response.json()
     0.0,
     0.4117647058823529
    ],
+   "pantone_code": "18-0503 tcx",
+   "pantone_name": "gargoyle",
    "entrylevel_name": "gray"
   },
   {
-   "name": "nickel",
-   "hex": "#727472",
+   "name": "charcoal gray",
+   "pantone_rgb": [
+    108,
+    104,
+    104
+   ],
+   "pantone_id": "pantone 18-0601 tcx charcoal gray",
+   "hex": "#6c6868",
    "universal_name": "gray",
    "rgb": [
-    114,
-    116,
-    114
+    108,
+    104,
+    104
    ],
    "hsv": [
-    120.0,
-    0.01724137931034475,
-    0.4549019607843137
+    0.0,
+    0.03703703703703709,
+    0.4235294117647059
    ],
+   "pantone_code": "18-0601 tcx",
+   "pantone_name": "charcoal gray",
    "entrylevel_name": "gray"
   },
   {
-   "name": "sonic silver",
-   "hex": "#757575",
+   "name": "gunmetal",
+   "pantone_rgb": [
+    92,
+    93,
+    91
+   ],
+   "pantone_id": "pantone 18-0306 tcx gunmetal",
+   "hex": "#5c5d5b",
    "universal_name": "gray",
    "rgb": [
-    117,
-    117,
-    117
+    92,
+    93,
+    91
    ],
    "hsv": [
-    0.0,
-    0.0,
-    0.4588235294117647
+    90.0,
+    0.02150537634408589,
+    0.36470588235294116
    ],
+   "pantone_code": "18-0306 tcx",
+   "pantone_name": "gunmetal",
    "entrylevel_name": "gray"
   }
  ]
 }
 ```
 
-Get the closest color name for a given color (specified by [RGB color model](https://en.wikipedia.org/wiki/RGB_color_model)).
+Get the closest color term for a given color (specified by [RGB color model](https://en.wikipedia.org/wiki/RGB_color_model)).
 
 ### End point
 
@@ -145,12 +145,14 @@ Get the closest color name for a given color (specified by [RGB color model](htt
 
 ### Request
 
-Parameter | Type | Description 
---------- | ------- | ----------- 
-r | query | (**Required**) The value for the red channel in the RGB color model (in the range 0 to 255).
-g | query | (**Required**) The value for the green channel in the RGB color model (in the range 0 to 255).
-b | query | (**Required**) The value for the blue channel in the RGB color model (in the range 0 to 255).
-
+Parameter | Type | Description | Default
+--------- | ------- | -----------  | ----------- 
+r | query | (**Required**) The value for the red channel in the RGB color model (in the range 0 to 255). |
+g | query | (**Required**) The value for the green channel in the RGB color model (in the range 0 to 255). |
+b | query | (**Required**) The value for the blue channel in the RGB color model (in the range 0 to 255). |
+color_count | query | the number of similar color terms (maximum value of 10) | 5
+color_family | query | the color family, can be either `full` or `pantone` | `pantone`
+               
 ### Response 
 
 Parameter |  Description
@@ -168,7 +170,7 @@ name | The best guess for the color name based on all the colors available in ou
 
 ```python
 #------------------------------------------------------------------------------
-# Get similar colors. 
+# Get other color terms similar to a given color term.
 # GET /v1/colors/similar_colors
 #------------------------------------------------------------------------------
 
@@ -176,14 +178,14 @@ import os
 import json
 import requests
 from urlparse import urljoin
+from pprint import pprint
 
 from props import *
 
 # Replace this with the custom url generated for you.
 api_gateway_url = props['api_gateway_url']
 
-# Pass the api key into the header
-# Replace 'your_api_key' with your API key.
+# Pass the api key into the header.
 headers = {'X-Api-Key': props['X-Api-Key']}
 
 api_endpoint = '/v1/colors/similar_colors'
@@ -194,12 +196,19 @@ params = {}
 params['color_term'] = 'purple'
 
 # Optional parameters
+params['color_count'] = 3
+#params['color_family'] = 'universal'
+#params['color_family'] = 'entrylevel'
 #params['color_family'] = 'full'
+
+# To serch within the pantone family
+#params['color_term'] = 'pantone 19-3336 tcx sparkling grape'
+#params['color_family'] = 'pantone'
 
 response = requests.get(url,headers=headers,params=params)
 
 print response.status_code
-print response.json()
+pprint(response.json())
 ```
 
 > Sample json response
@@ -208,7 +217,13 @@ print response.json()
 {
  "similar_colors": [
   {
-   "name": "purple html",
+   "name": "patriarch",
+   "pantone_rgb": [
+    119,
+    51,
+    118
+   ],
+   "pantone_id": "pantone 19-3336 tcx sparkling grape",
    "hex": "#800080",
    "universal_name": "purple",
    "rgb": [
@@ -221,74 +236,60 @@ print response.json()
     1.0,
     0.5019607843137255
    ],
+   "pantone_code": "19-3336 tcx",
+   "pantone_name": "sparkling grape",
    "entrylevel_name": "purple"
   },
   {
    "name": "violet",
-   "hex": "#8f00ff",
-   "universal_name": "blue",
+   "pantone_rgb": [
+    193,
+    127,
+    181
+   ],
+   "pantone_id": "pantone 16-3320 tcx violet",
+   "hex": "#c17fb5",
+   "universal_name": "pink",
    "rgb": [
-    143,
-    0,
-    255
+    193,
+    127,
+    181
    ],
    "hsv": [
-    273.6470588235294,
-    1.0,
-    1.0
+    310.9090909090909,
+    0.34196891191709844,
+    0.7568627450980392
    ],
-   "entrylevel_name": "violet"
+   "pantone_code": "16-3320 tcx",
+   "pantone_name": "violet",
+   "entrylevel_name": "magenta"
   },
   {
-   "name": "navy",
-   "hex": "#000080",
-   "universal_name": "blue",
-   "rgb": [
-    0,
-    0,
-    128
+   "name": "navy blue",
+   "pantone_rgb": [
+    64,
+    63,
+    111
    ],
-   "hsv": [
-    240.0,
-    1.0,
-    0.5019607843137255
-   ],
-   "entrylevel_name": "navy blue"
-  },
-  {
-   "name": "rich maroon",
-   "hex": "#b03060",
+   "pantone_id": "pantone 19-3832 tcx navy blue",
+   "hex": "#403f6f",
    "universal_name": "purple",
    "rgb": [
-    176,
-    48,
-    96
+    64,
+    63,
+    111
    ],
    "hsv": [
-    337.5,
-    0.7272727272727273,
-    0.6901960784313725
+    241.25,
+    0.43243243243243246,
+    0.43529411764705883
    ],
-   "entrylevel_name": "maroon"
-  },
-  {
-   "name": "blue",
-   "hex": "#0000ff",
-   "universal_name": "blue",
-   "rgb": [
-    0,
-    0,
-    255
-   ],
-   "hsv": [
-    240.0,
-    1.0,
-    1.0
-   ],
-   "entrylevel_name": "blue"
+   "pantone_code": "19-3832 tcx",
+   "pantone_name": "navy blue",
+   "entrylevel_name": "navy blue"
   }
  ],
- "time_ms": "0.17"
+ "time_ms": "0.11"
 }
 ```
 
@@ -303,7 +304,8 @@ Get other color terms similar to a given color term.
 Parameter | Type | Description | Default
 --------- | ------- | ----------- | ----------- 
 color_term  | query | (**Required**) The color term. |
-color_family | query | The color family to use to retrieve the similar colors. Can take values `universal`, `entrylevel` or `full` | `entrylevel`
+color_count | query | the number of similar color terms (maximum value of 10) | 5
+color_family | query | The color family to use to retrieve the similar colors. Can take values `universal`, `entrylevel` ,`full` or `pantone` | `entrylevel`
 
 ### Response 
 
