@@ -313,6 +313,7 @@ params = {}
 params['colors'] = 20
 params['max_colors_per_image'] = 2
 params['fraction_pixels_threshold'] = 0.1
+params['embedding'] = 'true'
 
 # Catalog name.
 catalog_name = props['catalog_name']
@@ -373,6 +374,7 @@ catalog_name | path | (**Required**) The catalog name. |
 colors | query | The number of dominant colors to compute. | 10
 max_colors_per_image | query | The maximum number of dominant colors to use per image. | all available colors
 fraction_pixels_threshold | query | Include only those colors whos fraction of pixels is greater than this number. | 0.0
+embedding | query | If `true` embeds the dominant colors in two dimensions using [t-SNE](https://lvdmaaten.github.io/tsne/) embedding and returns the embedding as a grid assignment in the results. The optimal gird size is automatically computed based on the number of dominant colors requested. | `false`
 
 ### Response 
 
@@ -570,7 +572,7 @@ api_gateway_url = props['api_gateway_url']
 headers = {'X-Api-Key': props['X-Api-Key']}
 
 params = {}
-params['colors'] = 5
+params['colors'] = 9
 
 # Catalog name.
 catalog_name = props['catalog_name']
@@ -588,201 +590,231 @@ pprint(response.json())
 > Sample json response
 
 ```json
-{u'computed_on': u'2018-03-25 13:08:05.714292',
- u'dominant_colors': [{u'entrylevel_name': u'black',
-                       u'hex': u'#282629',
-                       u'hsv': [279.99999999999994,
-                                0.07317073170731714,
-                                0.1607843137254902],
-                       u'lab': [15.4738227287183,
-                                1.643636143861621,
-                                -1.6514882578694712],
-                       u'n_instances': 4,
-                       u'name': u'raisin black',
-                       u'pantone_code': u'19-3911 tcx',
-                       u'pantone_id': u'pantone 19-3911 tcx black beauty',
-                       u'pantone_name': u'black beauty',
-                       u'pantone_rgb': [38, 38, 42],
-                       u'popularity': 0.10810810810810811,
-                       u'popularity_percentile': 100.0,
-                       u'rgb': [40, 38, 41],
-                       u'universal_name': u'black'},
-                      {u'entrylevel_name': u'tan',
-                       u'hex': u'#cdb3a2',
-                       u'hsv': [23.720930232558146,
-                                0.20975609756097569,
-                                0.803921568627451],
-                       u'lab': [74.716930640067,
-                                6.646359569893512,
-                                12.110173948868752],
-                       u'n_instances': 3,
-                       u'name': u'rose dust',
-                       u'pantone_code': u'14-1307 tcx',
-                       u'pantone_id': u'pantone 14-1307 tcx rose dust',
-                       u'pantone_name': u'rose dust',
-                       u'pantone_rgb': [205, 178, 165],
-                       u'popularity': 0.08108108108108109,
-                       u'popularity_percentile': 87.5,
-                       u'rgb': [205, 179, 162],
-                       u'universal_name': u'pink'},
-                      {u'entrylevel_name': u'silver',
-                       u'hex': u'#cfcccc',
-                       u'hsv': [0.0,
-                                0.01449275362318836,
-                                0.8117647058823529],
-                       u'lab': [82.27695306528122,
-                                1.0314644455792221,
-                                0.3580088239849344],
-                       u'n_instances': 3,
-                       u'name': u'timberwolf',
-                       u'pantone_code': u'13-4104 tcx',
-                       u'pantone_id': u'pantone 13-4104 tcx antarctica',
-                       u'pantone_name': u'antarctica',
-                       u'pantone_rgb': [198, 197, 198],
-                       u'popularity': 0.08108108108108109,
-                       u'popularity_percentile': 87.5,
-                       u'rgb': [207, 204, 204],
-                       u'universal_name': u'white'},
-                      {u'entrylevel_name': u'off white',
-                       u'hex': u'#ebe5e5',
-                       u'hsv': [0.0,
-                                0.025531914893616947,
-                                0.9215686274509803],
-                       u'lab': [91.396105013505,
-                                2.0227459343862275,
-                                0.7108750672036868],
-                       u'n_instances': 3,
-                       u'name': u'platinum',
-                       u'pantone_code': u'11-1001 tcx',
-                       u'pantone_id': u'pantone 11-1001 tcx white alyssum',
-                       u'pantone_name': u'white alyssum',
-                       u'pantone_rgb': [239, 235, 231],
-                       u'popularity': 0.08108108108108109,
-                       u'popularity_percentile': 87.5,
-                       u'rgb': [235, 229, 229],
-                       u'universal_name': u'white'},
-                      {u'entrylevel_name': u'peach',
-                       u'hex': u'#ebceb5',
-                       u'hsv': [27.77777777777777,
-                                0.22978723404255308,
-                                0.9215686274509803],
-                       u'lab': [84.55704693472978,
-                                6.337699403810959,
-                                16.165955587964454],
-                       u'n_instances': 3,
-                       u'name': u'nude',
-                       u'pantone_code': u'12-0807 tcx',
-                       u'pantone_id': u'pantone 12-0807 tcx sun kiss',
-                       u'pantone_name': u'sun kiss',
-                       u'pantone_rgb': [235, 209, 187],
-                       u'popularity': 0.08108108108108109,
-                       u'popularity_percentile': 87.5,
-                       u'rgb': [235, 206, 181],
-                       u'universal_name': u'white'}],
- u'time_ms': u'4.42'}
-
-In [52]: print json.dumps(response.json(),indent=1)
 {
- "computed_on": "2018-03-25 13:08:05.714292",
- "time_ms": "4.42",
+ "computed_on": "2018-04-01 13:51:12.278474",
+ "time_ms": "3.24",
  "dominant_colors": [
   {
-   "name": "raisin black",
-   "pantone_rgb": [
-    38,
-    38,
-    42
+   "embedding_grid": [
+    0.0,
+    0.0
    ],
-   "pantone_id": "pantone 19-3911 tcx black beauty",
-   "popularity": 0.10810810810810811,
-   "hex": "#282629",
-   "universal_name": "black",
+   "name": "bisque",
+   "pantone_rgb": [
+    218,
+    192,
+    167
+   ],
+   "pantone_id": "pantone 13-1011 tcx ivory cream",
+   "popularity": 0.1891891891891892,
+   "hex": "#dec1aa",
+   "universal_name": "pink",
    "lab": [
-    15.4738227287183,
-    1.643636143861621,
-    -1.6514882578694712
+    79.93886694122813,
+    6.754293758508223,
+    15.36922771034137
    ],
    "popularity_percentile": 100.0,
    "rgb": [
-    40,
-    38,
-    41
+    222,
+    193,
+    170
    ],
-   "n_instances": 4,
-   "pantone_code": "19-3911 tcx",
+   "n_instances": 7,
+   "pantone_code": "13-1011 tcx",
    "hsv": [
-    279.99999999999994,
-    0.07317073170731714,
-    0.1607843137254902
+    26.538461538461547,
+    0.23423423423423428,
+    0.8705882352941177
    ],
-   "pantone_name": "black beauty",
-   "entrylevel_name": "black"
-  },
-  {
-   "name": "rose dust",
-   "pantone_rgb": [
-    205,
-    178,
-    165
-   ],
-   "pantone_id": "pantone 14-1307 tcx rose dust",
-   "popularity": 0.08108108108108109,
-   "hex": "#cdb3a2",
-   "universal_name": "pink",
-   "lab": [
-    74.716930640067,
-    6.646359569893512,
-    12.110173948868752
-   ],
-   "popularity_percentile": 87.5,
-   "rgb": [
-    205,
-    179,
-    162
-   ],
-   "n_instances": 3,
-   "pantone_code": "14-1307 tcx",
-   "hsv": [
-    23.720930232558146,
-    0.20975609756097569,
-    0.803921568627451
-   ],
-   "pantone_name": "rose dust",
+   "pantone_name": "ivory cream",
    "entrylevel_name": "tan"
   },
   {
-   "name": "timberwolf",
-   "pantone_rgb": [
-    198,
-    197,
-    198
+   "embedding_grid": [
+    1.0,
+    0.0
    ],
-   "pantone_id": "pantone 13-4104 tcx antarctica",
-   "popularity": 0.08108108108108109,
-   "hex": "#cfcccc",
+   "name": "jet",
+   "pantone_rgb": [
+    42,
+    43,
+    45
+   ],
+   "pantone_id": "pantone 19-4004 tcx tap shoe",
+   "popularity": 0.16216216216216217,
+   "hex": "#2b2c2d",
+   "universal_name": "black",
+   "lab": [
+    17.93853276291656,
+    -0.2022203751522733,
+    -0.8051385777718023
+   ],
+   "popularity_percentile": 83.33333333333334,
+   "rgb": [
+    43,
+    44,
+    45
+   ],
+   "n_instances": 6,
+   "pantone_code": "19-4004 tcx",
+   "hsv": [
+    210.0000000000001,
+    0.0444444444444444,
+    0.17647058823529413
+   ],
+   "pantone_name": "tap shoe",
+   "entrylevel_name": "black"
+  },
+  {
+   "embedding_grid": [
+    2.0,
+    0.0
+   ],
+   "name": "silver sand",
+   "pantone_rgb": [
+    197,
+    198,
+    199
+   ],
+   "pantone_id": "pantone 14-4102 tcx glacier gray",
+   "popularity": 0.16216216216216217,
+   "hex": "#c4c6c6",
    "universal_name": "white",
    "lab": [
-    82.27695306528122,
-    1.0314644455792221,
-    0.3580088239849344
+    79.72810735816829,
+    -0.6892262565815765,
+    -0.24903099362945103
    ],
-   "popularity_percentile": 87.5,
+   "popularity_percentile": 83.33333333333334,
    "rgb": [
-    207,
-    204,
-    204
+    196,
+    198,
+    198
    ],
-   "n_instances": 3,
-   "pantone_code": "13-4104 tcx",
+   "n_instances": 6,
+   "pantone_code": "14-4102 tcx",
    "hsv": [
-    0.0,
-    0.01449275362318836,
-    0.8117647058823529
+    180.0,
+    0.010101010101010055,
+    0.7764705882352941
    ],
-   "pantone_name": "antarctica",
+   "pantone_name": "glacier gray",
    "entrylevel_name": "silver"
   },
   {
+   "embedding_grid": [
+    0.0,
+    1.0
+   ],
+   "name": "granite gray",
+   "pantone_rgb": [
+    102,
+    103,
+    109
+   ],
+   "pantone_id": "pantone 18-4006 tcx quiet shade",
+   "popularity": 0.10810810810810811,
+   "hex": "#61636a",
+   "universal_name": "gray",
+   "lab": [
+    42.0086797684853,
+    0.7439991692389514,
+    -4.226920295539904
+   ],
+   "popularity_percentile": 55.55555555555556,
+   "rgb": [
+    97,
+    99,
+    106
+   ],
+   "n_instances": 4,
+   "pantone_code": "18-4006 tcx",
+   "hsv": [
+    226.66666666666663,
+    0.08490566037735858,
+    0.41568627450980394
+   ],
+   "pantone_name": "quiet shade",
+   "entrylevel_name": "gray"
+  },
+  {
+   "embedding_grid": [
+    1.0,
+    1.0
+   ],
+   "name": "copper red",
+   "pantone_rgb": [
+    209,
+    111,
+    82
+   ],
+   "pantone_id": "pantone 16-1441 tcx arabesque",
+   "popularity": 0.10810810810810811,
+   "hex": "#c5694a",
+   "universal_name": "red",
+   "lab": [
+    54.52250103123478,
+    33.8426536300997,
+    33.601454680289436
+   ],
+   "popularity_percentile": 55.55555555555556,
+   "rgb": [
+    197,
+    105,
+    74
+   ],
+   "n_instances": 4,
+   "pantone_code": "16-1441 tcx",
+   "hsv": [
+    15.121951219512198,
+    0.6243654822335025,
+    0.7725490196078432
+   ],
+   "pantone_name": "arabesque",
+   "entrylevel_name": "tomato"
+  },
+  {
+   "embedding_grid": [
+    2.0,
+    1.0
+   ],
+   "name": "steel teal",
+   "pantone_rgb": [
+    85,
+    143,
+    145
+   ],
+   "pantone_id": "pantone 17-4818 tcx bristol blue",
+   "popularity": 0.10810810810810811,
+   "hex": "#54919a",
+   "universal_name": "gray",
+   "lab": [
+    56.55290842710919,
+    -17.2649007031071,
+    -10.93920065553089
+   ],
+   "popularity_percentile": 55.55555555555556,
+   "rgb": [
+    84,
+    145,
+    154
+   ],
+   "n_instances": 4,
+   "pantone_code": "17-4818 tcx",
+   "hsv": [
+    187.71428571428572,
+    0.4545454545454545,
+    0.6039215686274509
+   ],
+   "pantone_name": "bristol blue",
+   "entrylevel_name": "teal"
+  },
+  {
+   "embedding_grid": [
+    0.0,
+    2.0
+   ],
    "name": "platinum",
    "pantone_rgb": [
     239,
@@ -798,7 +830,7 @@ In [52]: print json.dumps(response.json(),indent=1)
     2.0227459343862275,
     0.7108750672036868
    ],
-   "popularity_percentile": 87.5,
+   "popularity_percentile": 33.33333333333333,
    "rgb": [
     235,
     229,
@@ -815,37 +847,81 @@ In [52]: print json.dumps(response.json(),indent=1)
    "entrylevel_name": "off white"
   },
   {
-   "name": "nude",
-   "pantone_rgb": [
-    235,
-    209,
-    187
+   "embedding_grid": [
+    1.0,
+    2.0
    ],
-   "pantone_id": "pantone 12-0807 tcx sun kiss",
-   "popularity": 0.08108108108108109,
-   "hex": "#ebceb5",
+   "name": "pale turquoise",
+   "pantone_rgb": [
+    188,
+    227,
+    223
+   ],
+   "pantone_id": "pantone 12-5410 tcx bleached aqua",
+   "popularity": 0.05405405405405406,
+   "hex": "#bce9e9",
    "universal_name": "white",
    "lab": [
-    84.55704693472978,
-    6.337699403810959,
-    16.165955587964454
+    89.32296955480805,
+    -14.40754901948721,
+    -4.797498595756533
    ],
-   "popularity_percentile": 87.5,
+   "popularity_percentile": 22.22222222222222,
    "rgb": [
-    235,
-    206,
-    181
+    188,
+    233,
+    233
    ],
-   "n_instances": 3,
-   "pantone_code": "12-0807 tcx",
+   "n_instances": 2,
+   "pantone_code": "12-5410 tcx",
    "hsv": [
-    27.77777777777777,
-    0.22978723404255308,
-    0.9215686274509803
+    180.0,
+    0.19313304721030033,
+    0.9137254901960784
    ],
-   "pantone_name": "sun kiss",
-   "entrylevel_name": "peach"
+   "pantone_name": "bleached aqua",
+   "entrylevel_name": "sky blue"
+  },
+  {
+   "embedding_grid": [
+    2.0,
+    2.0
+   ],
+   "name": "antique brass",
+   "pantone_rgb": [
+    202,
+    153,
+    120
+   ],
+   "pantone_id": "pantone 16-1331 tcx toast",
+   "popularity": 0.02702702702702703,
+   "hex": "#cc9773",
+   "universal_name": "orange",
+   "lab": [
+    66.68024118683753,
+    15.365610229684856,
+    26.723238983154786
+   ],
+   "popularity_percentile": 11.11111111111111,
+   "rgb": [
+    204,
+    151,
+    115
+   ],
+   "n_instances": 1,
+   "pantone_code": "16-1331 tcx",
+   "hsv": [
+    24.2696629213483,
+    0.4362745098039216,
+    0.8
+   ],
+   "pantone_name": "toast",
+   "entrylevel_name": "tan"
   }
+ ],
+ "grid_size": [
+  3,
+  3
  ]
 }
 ```
@@ -875,6 +951,7 @@ Parameter |  Description
 --------- |  -----------
 time_ms |  The time taken in milliseconds.
 computed_on | The time the dominant colors where computed.
+grid_size | The grid size for the embedding.
 **dominant_colors** |  A list of dominant colors for the catalog sorted in the decreasing order of popularity. Each field in the list has the following fieldnames.
 rgb | The [RGB](https://en.wikipedia.org/wiki/RGB_color_model) values for the color.
 hsv | The [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV) values for the color.
@@ -885,6 +962,7 @@ name | The best guess for the color name based on all the colors avaialable in o
 popularity | A score between 0 and 1 indicating the popularity of the color.
 popularity_percentile | The corresponding percentile score.
 n_instances | The number of colors in the cluster.
+embedding_grid | The position in the grid.
 
 ## Get dominant colors for a product
 
@@ -1048,7 +1126,7 @@ for color_info in results['dominant_colors']:
    "entrylevel_name": "black"
   }
  ],
- "time_ms": "60.52",
+ "time_ms": "10.74",
  "bounding_box": {
   "image_location": "/v1/catalog/sample_catalog/images/SHRES16AWFSDR9346B_1.jpg?top_left_x=83&top_left_y=0&width=107&height=365",
   "top_left_x": 83,
