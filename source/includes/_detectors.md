@@ -353,7 +353,7 @@ Detect and find the bounding boxes for all apparel, accessories and footwear in 
 Parameter | Type | Description | Default
 --------- | ------- | ----------- | -----------
 data | image/jpeg | (**Required**) The image. The image can be in PNG, JPEG, BMP, or GIF.
-threhold | query |  Threshold for detections, ignore entities whose score is below this threshold value. | 0.2
+threshold | query |  Threshold for detections, ignore entities whose score is below this threshold value. | 0.2
 
 Instead of the posting the image data you can also pass an image url.
 
