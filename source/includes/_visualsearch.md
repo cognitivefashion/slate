@@ -2,7 +2,7 @@
 
 A collection of APIs for enabling a better search experience using the catalog images. Visual search helps a consumer discover exact match or show similar fashion products based on image search. 
 
-These APIs support the following two use cases:
+These APIs support the following two variants:
 
 1. **Visual Browse:  Show me more like this** A user clicks on an existing apparel/accessory image in the catalog and visual browse will fetch and display similar looking products from the catalog. This is a more interactive way of browsing the catalog based on visual search. It essentially recreates the experience of asking a shopkeeper “Show me more dresses like this.” and encourages serendipitous buying. This can also be used for finding other similar looks for any product in the catalog.
 
@@ -287,6 +287,7 @@ import os
 import json
 import requests
 from urlparse import urljoin
+from pprint import pprint
 
 from props import *
 
@@ -298,10 +299,10 @@ api_gateway_url = props['api_gateway_url']
 headers = {'X-Api-Key': props['X-Api-Key']}
 
 # Catalog name.
-catalog_name = 'sample_catalog'
+catalog_name = props['catalog_name']
 
-id ='109FA16AWWWSG9G06Y05'
-image_id = '1'
+id ='LPJNA16AMDMTE91662'
+image_id = '2'
 
 api_endpoint = '/v1/catalog/%s/visual_browse/%s/%s'%(catalog_name,id,image_id)
 
@@ -310,11 +311,14 @@ url = urljoin(api_gateway_url,api_endpoint)
 params = {}
 # Optional parameters.
 params['max_number_of_results'] = 5
+#params['use_cache'] = 'false'
+#params['sort_option'] = 'apparel_similarity'
 
 response = requests.get(url,headers=headers,params=params)
 
+print response.url
 print response.status_code
-print response.json()
+pprint(response.json())
 
 # List the relevant images
 for product in response.json()['products']:
@@ -326,39 +330,40 @@ for product in response.json()['products']:
     response = requests.get(url,headers=headers)
     image_url = response.json()['data']['images'][image_id]['image_url']
     print('%s %s %1.2f %s'%(id,image_id,score,image_url))
-
 ```
 
 > Sample json response
 
 ```json
 {
- "time_ms": "0.96",
+ "time_ms": "1.67",
+ "cache": true,
+ "sort_option": "visual_similarity",
  "products": [
   {
-   "image_id": "3",
-   "id": "20DRA16FWCWHL9012909",
-   "similarity": 0.9999205280983006
+   "image_id": "2",
+   "id": "LPJNA16AMDMTE91662",
+   "similarity": 1.0
+  },
+  {
+   "image_id": "1",
+   "id": "LPJNA16AMDMTE91662",
+   "similarity": 0.6761164963245392
+  },
+  {
+   "image_id": "1",
+   "id": "LPJNA16AMDMTE91642",
+   "similarity": 0.5998596549034119
   },
   {
    "image_id": "2",
-   "id": "20DRA16FWCWHL9012909",
-   "similarity": 0.47892576456069946
+   "id": "LPJNA16AMDMTE91642",
+   "similarity": 0.5588061809539795
   },
   {
-   "image_id": "3",
-   "id": "20DRA16FWCWPP9014709",
-   "similarity": 0.4464869499206543
-  },
-  {
-   "image_id": "3",
-   "id": "20DRA16FWCWHL9015309",
-   "similarity": 0.429345965385437
-  },
-  {
-   "image_id": "6",
-   "id": "20DRA16FWCWHL9012909",
-   "similarity": 0.39676886796951294
+   "image_id": "2",
+   "id": "SKLTS16AMCWSH8SP01",
+   "similarity": 0.4556262493133545
   }
  ]
 }
@@ -381,17 +386,25 @@ Parameter | Type | Description | Default
 catalog_name | path | (**Required**) The catalog name. |
 id | path | (**Required**) The product id. |
 image_id | path | (**Required**) The image id. |
-max_number_of_results | query | maximum number of results to return | 12
-                
+max_number_of_results | query | The maximum number of results to return. | 12
+use_cache | query | The first time visual browse is called it caches the results. On subsequent requests we directly retrieve the results from the cache unless `use_cache=false`. | `true`
+sort_option | query | The sort option to use. Can be either `visual_similarity` (Results are sorted by visual similarity.) or `apparel_similarity` (Re-sorts the results from visual browse using a combination of visual similarity and textual similarity based on the avaialble meta data.) | `visual_similarity`
+
 ### Response 
 
 Parameter |  Description
 --------- |  -----------
 time_ms |  The time taken in milliseconds.
+cache | Indicates whether cache was used or not.
+sort_option | The sort_option used.
 **products** | A sorted list of other visually similar images. The first item in the list is the specified image.
 image_id | The image id.
 id | The product id.
-similarity | The similarity score in the range from 0(dissimilar)  to 1 (similar). 
+similarity | The similarity score in the range from 0(dissimilar)  to 1(similar). 
+
+<aside class="notice">
+The first time the API is called the nearest neighbors are retrieved and the results are cached. On subsequent calls the API directly retrieves the results from the cache unless specified not to use the cache. The cache automatically gets invalidated whenever the index gets updated.
+</aside>
 
 ## Visual Search
 
