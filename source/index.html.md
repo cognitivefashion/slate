@@ -86,6 +86,50 @@ If you are making a `GET` request, you may also pass in the API key as a paramet
 You must replace <code>your_api_key</code> with your personal API key.
 </aside>
 
+# Data collection
+
+```shell
+# Set X-Data-Collection-Opt-Out to true in the header.
+curl 'api_endpoint_here' -H  "X-Data-Collection-Opt-Out: true"
+
+# If you are making a GET request, 
+# you may also set the data_collection_opt_out parameter to true.
+curl "api_endpoint_here"?data_collection_opt_out=true
+```
+
+```python
+import requests
+
+url = 'api_endpoint_here'
+
+# Set X-Data-Collection-Opt-Out to true in the header.
+headers = {}
+headers['X-Api-Key'] = 'your_api_key'
+headers['X-Data-Collection-Opt-Out'] = 'true'
+
+response = requests.get(url,headers=headers)
+
+url = 'api_endpoint_here'
+
+# If you are making a GET request, you may also set the 
+# data_collection_opt_out parameter to true.
+params = {}
+params['api_key'] = 'your_api_key'
+params['data_collection_opt_out'] = 'true'
+
+response = requests.get(url,params=params)
+```
+
+By default, most APIs log requests and their results. For example, the visual search API by default will save the user uploaded image. Logging is done only to improve the accuracy of the APIs. The logged data is not shared or made public. However, you have the option of opting out. To prevent the service from accessing your data for further API improvements, set the `X-Data-Collection-Opt-Out` header parameter to `true`. For example, for visual search API this will delete the user uploaded image from our servers as soon as the computations are done.
+
+The preferred way is to include it in a header that looks like the following:
+
+`curl 'api_endpoint_here' -H  "X-Data-Collection-Opt-Out: true"`
+
+If you are making a GET request, you may also set the `data_collection_opt_out ` parameter to `true`.
+
+`curl "api_endpoint_here"?data_collection_opt_out=true`
+
 # Fashion quote
 
 ```python
