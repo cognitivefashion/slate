@@ -32,6 +32,8 @@ params['quality'] = 1
 params['ignore_background'] = 'true'
 params['model'] = 'person_accurate'
 #params['fraction_pixels_threshold'] = 0.1
+params['color_name_method'] = 'accurate'
+#params['color_name_method'] = 'fast'
 
 api_endpoint = '/v1/colors/dominant_colors'
 
@@ -249,6 +251,7 @@ image_max_dimension | query | You can set this parameters to resize the image fo
 ignore_background | query | By default we use the entire image to compute the dominant colors. If we set this parameter to `true` we internally use some algorithms to ignore the background and mainly focus on the person or apparel. | `false`
 model | query | The model to use to ignore the background. Currently we use person detecors to focus only on the person. The following options are supported `person_fast` (faster but slightly less accurate model), `person_accurate` (slower but more accurate model) and `person_basic` (a basic person detector using standard body proportions). | `person_fast`   
 fraction_pixels_threshold | query  | Include only those colors whos fraction of pixels is greater than this number. |  0.0
+color_name_method | query | The method to use to get the color names, can be either `accurate` (exact but slower) or `fast` (approximate but fast) | `accurate`
 
 Instead of the posting the image data you can also pass an image url.
 

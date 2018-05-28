@@ -45,11 +45,17 @@ params['g'] = 103
 params['b'] = 95
 
 # Parameters - optional
-#params['color_count'] = 3
-#params['color_family'] = 'full'
+params['color_count'] = 3
+params['color_family'] = 'full'
+#params['color_family'] = 'universal'
+#params['color_family'] = 'entrylevel'
 #params['color_family'] = 'pantone'
+params['method'] = 'accurate'
+#params['method'] = 'fast'
 
-response = requests.get(url,headers=headers,params=params)
+response = requests.get(url,
+                        headers=headers,
+                        params=params)
 
 print response.status_code
 pprint(response.json())
@@ -151,7 +157,8 @@ r | query | (**Required**) The value for the red channel in the RGB color model 
 g | query | (**Required**) The value for the green channel in the RGB color model (in the range 0 to 255). |
 b | query | (**Required**) The value for the blue channel in the RGB color model (in the range 0 to 255). |
 color_count | query | the number of similar color terms (maximum value of 10) | 5
-color_family | query | the color family, can be either `full` or `pantone` | `pantone`
+color_family | query | the color family, can be either `universal`, `entrylevel`, `full` or `pantone` | `full`
+method | query | The method to use to get the color names, can be either `accurate` (exact but slower) or `fast` (approximate but fast) | `accurate`
                
 ### Response 
 
