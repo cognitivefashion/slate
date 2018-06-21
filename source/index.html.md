@@ -8,10 +8,13 @@ language_tabs:
 toc_footers:
   - <a href='https://cognitivefashion.github.io/'>Project Website</a>
   - <a href='https://github.com/cognitivefashion/cf-sdk-python'>Python SDK</a>
-  - <a href='mailto:viraykar@in.ibm.com;jaikhari@in.ibm.com?Subject=AI%20%20for%20Fashion%20API%20key'>Request an API key</a>
+  - <a href='mailto:viraykar@in.ibm.com;jaikhari@in.ibm.com?Subject=AI%20%20for%20Fashion'>Contact</a>
 includes:
   - catalog
+  - visualsearchindex
+  - visualbrowse
   - visualsearch
+  - visualsearchcategories
   - textsearch
   - nls
   - visualattributes

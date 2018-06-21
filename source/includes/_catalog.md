@@ -14,6 +14,7 @@ The APIs come in two flavors. Some APIs are simple and do not require access to 
  "out_of_stock": "no",
  "name": "109f women brown & yellow printed dress", 
  "category": "dress", 
+ "visual_search_category": ["dress"],
  "taxonomy": "women;dress", 
  "gender": "female",  
  "age_group": [
@@ -26,28 +27,32 @@ The APIs come in two flavors. Some APIs are simple and do not require access to 
    "pose": "front", 
    "ignore": "no",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Front_Large.jpg", 
-   "model_worn": "yes"
+   "model_worn": "yes",
+   "image_type": "primary"
   }, 
   "3": {
    "camera_focus": "detail", 
    "pose": "UNK", 
    "ignore": "yes",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Detail_Large.jpg", 
-   "model_worn": "no"
+   "model_worn": "no",
+   "image_type": "secondary"
   }, 
   "2": {
    "camera_focus": "full", 
    "pose": "right", 
    "ignore": "no",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Right_Large.jpg", 
-   "model_worn": "yes"
+   "model_worn": "yes",
+   "image_type": "secondary"
   }, 
   "4": {
    "camera_focus": "full", 
    "pose": "back", 
    "ignore": "no",
    "image_url": "http://images.abofcdn.com/catalog/images/2016/109FA16AWWWDR9D03Y10/Back_Large.jpg", 
-   "model_worn": "yes"
+   "model_worn": "yes",
+   "image_type": "secondary"
   }
  }, 
  "color": [
@@ -104,6 +109,7 @@ out_of_stock | string | Can either be `yes` or `no`. This is the field that need
 | | | *You will typically use this when the product will be replenished. If you think the product will be discontinued and not available again you can delete that product entirely.*
 **name** | string | The name of the product. This is generally a free text brief description of the product.
 category | string | The product category.
+visual_search_category | list string |  A list of categories(or buckets) this product belongs to. This field is used to support category based visual search. A separate visual search index will be built with images from a particular category. While in most cases this will be same as `category` field in principle this field can be differnet. For example, `shirts` could be the `category` while the `visual_search_category` could be `women shirts`. The field can also support multiple category values. For example, `data['visual_search_category'] = ['tops','blouses']`. This means that the images corresponding to this product will be included in the visual search index for both `tops` and `blouses`.
 taxonomy | string | The complete product taxonomy if known, separated via `;`.
 **gender** | string | The gender for which the product is intended for, can be `male`, `female` or `unisex`.
 age_group | list string | The age group for which the product is intended for. Some suggested tags : `baby`, `kid`, `teenager`, `adult`.
@@ -114,7 +120,8 @@ age_group | list string | The age group for which the product is intended for. S
 | | model_worn | If `yes` then the image corresponds to the model wearing the particular product. If `no` refers to image of the the product only. Use `UNK` if not known.
 | | pose | Refers to the pose/orientation in which the image is taken. Can take one of the following values: `front`, `back`, `left`, `right`, `top`, `UNK`.
 | | camera_focus | Which part of the model the camera is focussed on. Can take one of the following values: `full` (complete view of the model, entire body), `top` (upper part of the model above the waist, used in shirts etc.), `bottom` (lower part of the model below the waist, used in trousers etc.), `portrait` (model face, normally up to the shoulder), `detail` (a close-up of some details in the product), `outfit` (complete view of the model, entire body along with other apparel and accessories), `UNK`.
-| | | *The fields `ignore`,`model_worn`, `pose` and `camera_focus` are optional.*
+| | image_type | Can be either `primary` or `secondary`. You can use this field also to categorize images.
+| | | *The fields `ignore`,`model_worn`, `pose`, `camera_focus`, and `image_type` are optional.*
 color | list of string | A list of colors terms that describe the colors in the product.
 pattern | list of string | A list of pattern terms that describe the pattern on the fabric.
 fabric | list of string | A list of terms that describe the fabric used in the product.
