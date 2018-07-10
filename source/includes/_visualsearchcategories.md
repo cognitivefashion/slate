@@ -1,4 +1,4 @@
-# (Category) Visual Search ++ 
+# (Category) Visual Search ++
 
 Visual search supports a field called `visual_search_category` which allows us to build a separate visual search for each category. The earlier set of APIs allows the user to specify this field manually and duing query the user has to specify the category interested in along with the image.
 

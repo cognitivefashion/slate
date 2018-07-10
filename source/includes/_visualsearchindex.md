@@ -14,10 +14,12 @@ A collection of APIs for enabling a better search experience using the catalog i
 
 ```python
 #------------------------------------------------------------------------------
-# Build the visual search index
+# Build the visual search index.
 # POST /v1/catalog/{catalog_name}/visual_search_index
 # params - per_category_index
 #          full_index
+#          group_by
+#          group_by_k 
 #------------------------------------------------------------------------------
 
 import os
@@ -67,6 +69,22 @@ params['per_category_index'] = 'true'
 #params['full_index'] = 'true'
 
 #------------------------------------------------------------------------------
+# group_by : boolean, optional(default:'false')
+#
+#    If this is set to True the group_by option is enabled. This
+#    groups the results from visual search into distinct groups 
+#    according to various criteria. Currently the group_by option 
+#    works only when full_index is set to True. If full_index is 
+#    False the group_by is disabled.
+#
+# group_by_k : int, optional(default:5).
+#
+#    The number of nearest neighbors to use for group_by.
+#------------------------------------------------------------------------------
+#params['group_by'] = 'false'
+#params['group_by_k'] = 5
+
+#------------------------------------------------------------------------------
 # PATH PARAMETERS
 #------------------------------------------------------------------------------
 # Catalog name.
@@ -112,6 +130,8 @@ Parameter | Type | Description | Default
 catalog_name | path | (**Required**) The catalog name. |
 per_category_index | query | If this is set to `true` builds a separate visual search index for each category as specified in the field `data['visual_search_category']`. | `false`
 full_index | query | If this is set to `true` builds the the full visual search index along with the separate visual search index for each visual search category. By default the full visual search index is built. Make this `false` only if you do not see the need for the full visual search index. | `true`
+group_by | query | If this is set to `true` the `group_by` option is enabled. This will allow the results from visual search to be grouped into distinct groups  according to various criteria. Currently the `group_by` option works only when `full_index` is set to `true`. If `full_index` is `false` the `group_by` option is disabled. | `false`
+group_by_k | query | The number of nearest neighbors to use for group_by. | 5
 
 ### Response 
 
