@@ -10,12 +10,13 @@ toc_footers:
   - <a href='https://github.com/cognitivefashion/cf-sdk-python'>Python SDK</a>
   - <a href='mailto:viraykar@in.ibm.com;jaikhari@in.ibm.com?Subject=AI%20%20for%20Fashion'>Contact</a>
 includes:
+  - product
   - catalog
+  - textsearch
   - visualsearchindex
   - visualbrowse
   - visualsearch
   - visualsearchcategories
-  - textsearch
   - nls
   - visualattributes
   - detectors

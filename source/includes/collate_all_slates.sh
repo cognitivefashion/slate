@@ -1,4 +1,6 @@
 # For ease of maintainence all the slate doucmentation for each api/microservice
-# are kep in the correspoding repo for the microservice.
-# Run this scrip to copy all the required files to this folder.
+# are kept in the correspoding repo for the microservice.
+# Run this script to copy all the required files to this slate folder for
+# deploying the documentation.
+cp -a /cognitive_fashion/code/cfapicatalog/slate/. .
 cp -a /cognitive_fashion/code/cfapivisualsearch/slate/. .
