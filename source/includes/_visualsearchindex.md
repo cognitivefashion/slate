@@ -6,9 +6,15 @@ A collection of APIs for enabling a better search experience using the catalog i
 
 1. **Visual Browse** (*Show me more like this*) A user clicks on an existing apparel/accessory image in the catalog and visual browse will fetch and display visually similar looking products from the catalog. This is a more interactive way of browsing the catalog based on visual search. 
 
-1. **Category based Visual Search/Browse** (*Search the look in a specific category*) The visual search APIs also support searching in a specific category. The user can upload any image and specify the category to search in (for example, show me similar looks like this in the `shirts` category). To enable this use `visual_search_category` field in the product json. 
+1. **Category based Visual Search/Browse** (*Visual Search and Visual Browse in a specific category*) The visual search and visual browse APIs also support searching in a specific category. For example, in visual search, the user can upload any image and specify the category to search in (for example, show me similar looks like this in the `dress` category). To enable this use `visual_search_category` (for visual search) and `visual_browse_category` (for visual browse) field in the product json. 
 
-`visual_search_category` - A list of categories(or buckets) this product belongs to (for example, `data['visual_search_category'] = ['shirts']`). This field is used to support category based visual search. A separate visual search index will be built with images from a particular category. While in most cases this will be same as `category` field in principle this field can be differnet. For example, `shirts` could be the `category` while the `visual_search_category` could be `women shirts`. The field can also support multiple category values. For example, `data['visual_search_category'] = ['tops','blouses']`. This means that the images corresponding to this product will be included in the visual search index for both `tops` and `blouses`.
+    `visual_search_category` - A list of categories(or buckets) this product belongs to (for example, `data['visual_search_category'] = ['dress']`). This field is used to support category based visual search. 
+
+    `visual_browse_category` - A list of categories(or buckets) this product belongs to (for example, `data['visual_browse_category'] = ['sheath dress']`). This field is used to support category based visual browse. 
+
+    A separate visual search index will be built with images from a particular category. While in most cases this will be same as `category` field in principle this field can be differnet. For example, `shirts` could be the `category` while the `visual_search_category` could be `women shirts`. 
+
+    The field can also support multiple category values. For example, `data['visual_search_category'] = ['tops','blouses']`. This means that the images corresponding to this product will be included in the visual search index for both `tops` and `blouses`.
 
 ## Build visual search index
 
@@ -25,7 +31,10 @@ A collection of APIs for enabling a better search experience using the catalog i
 import os
 import json
 import requests
-from urlparse import urljoin
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 from pprint import pprint
 
 from props import *
@@ -61,12 +70,12 @@ params['per_category_index'] = 'true'
 # full_index : str, optional (default: 'true')   
 #
 # If this is set to 'true' builds the the full visual search index along with
-# the separate visual search index for each visual search category. By default
-# the full visual search index is build alon with the separate index for each
-# category. Make this 'false' only if you do not see the need for the full
-# visual search index.
+# the separate visual search index for each visual search/browse category. 
+# By default the full visual search index is build along with the separate 
+# index for each category. Make this 'false' only if you do not see the need 
+# for the full visual search index.
 #------------------------------------------------------------------------------
-#params['full_index'] = 'true'
+#params['full_index'] = 'false'
 
 #------------------------------------------------------------------------------
 # group_by : boolean, optional(default:'false')
@@ -81,7 +90,7 @@ params['per_category_index'] = 'true'
 #
 #    The number of nearest neighbors to use for group_by.
 #------------------------------------------------------------------------------
-#params['group_by'] = 'false'
+#params['group_by'] = 'true'
 #params['group_by_k'] = 5
 
 #------------------------------------------------------------------------------
@@ -117,7 +126,7 @@ pprint(response.json())
 
 Build the visual search index.
 
-Before you can start using the visual search and visual browse APIs the visual search index has to be built first. This API computes the feature representations for all the catalog images and then builds a visual search index for fast nearest neighbor retrieval.
+Before you can start using the visual search and visual browse APIs the visual search index has to be built first. This API computes the feature representations for all the catalog images and then builds a visual search index(each each category) for fast nearest neighbor retrieval.
 
 ### End point
 
@@ -128,7 +137,7 @@ Before you can start using the visual search and visual browse APIs the visual s
 Parameter | Type | Description | Default
 --------- | ------- | ----------- | ----------- 
 catalog_name | path | (**Required**) The catalog name. |
-per_category_index | query | If this is set to `true` builds a separate visual search index for each category as specified in the field `data['visual_search_category']`. | `false`
+per_category_index | query | If this is set to `true` builds a separate visual search index for each category as specified in the field `data['visual_search_category']` and `data['visual_browse_category']`. | `false`
 full_index | query | If this is set to `true` builds the the full visual search index along with the separate visual search index for each visual search category. By default the full visual search index is built. Make this `false` only if you do not see the need for the full visual search index. | `true`
 group_by | query | If this is set to `true` the `group_by` option is enabled. This will allow the results from visual search to be grouped into distinct groups  according to various criteria. Currently the `group_by` option works only when `full_index` is set to `true`. If `full_index` is `false` the `group_by` option is disabled. | `false`
 group_by_k | query | The number of nearest neighbors to use for group_by. | 5
@@ -160,10 +169,14 @@ The current version supports building only one index at the same time and does n
 # Get the status of the visual search index. 
 # GET  /v1/catalog/{catalog_name}/visual_search_index
 #------------------------------------------------------------------------------
+
 import os
 import json
 import requests
-from urlparse import urljoin
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 from pprint import pprint
 
 from props import *
@@ -212,40 +225,38 @@ pprint(response.json())
 
 ```json
 {
- "time_ms": "5.18",
- "catalog_name": "sample_catalog",
  "status": {
   "status": "done",
-  "start_time": "2018-06-21 12:45:32.151198",
-  "finish_time": "2018-06-21 12:45:38.879901",
-  "num_of_products": "8",
-  "num_of_products_by_category": {
-   "t-shirt": "2",
-   "dress": "1",
-   "kurta": "1",
-   "joggers": "2",
-   "shirt": "2"
-  },
-  "num_of_images": "38",
-  "num_of_images_by_category": {
-   "t-shirt": "8",
-   "dress": "5",
-   "joggers": "10",
-   "kurta": "5",
-   "shirt": "10"
-  },
-  "feature_computation": {
-   "num_of_images_error": "0",
-   "num_of_images_ignored": "10",
-   "num_of_images_existing": "0",
-   "num_of_images_processed": "28"
-  },
   "visual_search_index": {
    "num_of_images_missing_features": "0",
    "num_of_images_indexed": "28",
    "num_of_images_ignored": "10"
   },
+  "num_of_products": "8",
+  "start_time": "2018-10-26 09:15:33.013153",
+  "index_updated": "true",
+  "finish_time": "2018-10-26 09:15:40.012162",
   "visual_search_index_by_category": {
+   "upper": {
+    "num_of_images_missing_features": "0",
+    "num_of_images_indexed": "12",
+    "num_of_images_ignored": "26"
+   },
+   "lower": {
+    "num_of_images_missing_features": "0",
+    "num_of_images_indexed": "8",
+    "num_of_images_ignored": "30"
+   },
+   "full": {
+    "num_of_images_missing_features": "0",
+    "num_of_images_indexed": "8",
+    "num_of_images_ignored": "30"
+   },
+   "shirt": {
+    "num_of_images_missing_features": "0",
+    "num_of_images_indexed": "8",
+    "num_of_images_ignored": "30"
+   },
    "t-shirt": {
     "num_of_images_missing_features": "0",
     "num_of_images_indexed": "4",
@@ -261,18 +272,42 @@ pprint(response.json())
     "num_of_images_indexed": "4",
     "num_of_images_ignored": "34"
    },
-   "shirt": {
-    "num_of_images_missing_features": "0",
-    "num_of_images_indexed": "8",
-    "num_of_images_ignored": "30"
-   },
    "joggers": {
     "num_of_images_missing_features": "0",
     "num_of_images_indexed": "8",
     "num_of_images_ignored": "30"
    }
+  },
+  "num_of_products_by_category": {
+   "upper": "4",
+   "lower": "2",
+   "full": "2",
+   "shirt": "2",
+   "t-shirt": "2",
+   "joggers": "2",
+   "dress": "1",
+   "kurta": "1"
+  },
+  "num_of_images": "38",
+  "feature_computation": {
+   "num_of_images_error": "0",
+   "num_of_images_ignored": "10",
+   "num_of_images_existing": "0",
+   "num_of_images_processed": "28"
+  },
+  "num_of_images_by_category": {
+   "upper": "18",
+   "lower": "10",
+   "full": "10",
+   "shirt": "10",
+   "t-shirt": "8",
+   "kurta": "5",
+   "dress": "5",
+   "joggers": "10"
   }
- }
+ },
+ "time_ms": "32.12",
+ "catalog_name": "sample_catalog"
 }
 ```
 
@@ -299,9 +334,9 @@ status | The current status of the index building process. The status can be one
 start_time | The time when the index building started.
 finish_time | The time when the index building finished.
 num_of_products | The total number of products in the catalog.
-num_of_products_by_category | The number of products in the catalog bucketed by `visual_search_category`.
+num_of_products_by_category | The number of products in the catalog bucketed by `visual_search_category` and `visual_browse_category`.
 num_of_images | The total number of images in the catalog.
-num_of_images_by_category | The number of images in the catalog bucketed by `visual_search_category`.
+num_of_images_by_category | The number of images in the catalog bucketed by `visual_search_category` and `visual_browse_category`.
 **feature_computation** | Info about feature computation.
 num_of_images_error | The number of images for which there was some error in feature computation.
 num_of_images_ignored | The number of images that were ignored.
@@ -311,7 +346,7 @@ num_of_images_processed | The total number of images for which the features were
 num_of_images_missing_features | The number of images for which there was no feature found.
 num_of_images_ignored | The number of images that were ignored.
 num_of_images_index | The total number of images finally indexed.
-**visual_search_index_by_category** | Same info as **visual_search_index** but bucketed by `visual_search_category`.
+**visual_search_index_by_category** | Same info as **visual_search_index** but bucketed by `visual_search_category` and `visual_browse_category`.
 
 <aside class="notice">
 The bucketed fields (*_by_category) are present in the response only when the 'per_category_index' parameter is set to 'true' during the index building.
@@ -328,7 +363,10 @@ The bucketed fields (*_by_category) are present in the response only when the 'p
 import os
 import json
 import requests
-from urlparse import urljoin
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 from pprint import pprint
 
 from props import *
