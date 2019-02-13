@@ -1,22 +1,23 @@
 # Catalog 
 
-The APIs come in two flavors. Some APIs are simple and do not require access to the product catalog. However we have another bunch of powerful APIs which operate on top of the client catalog. The first step is to upload the product catalog. These are some end points for uploading, accessing, modifying and deleting  a product catalog.
+The APIs come in two flavors. Some APIs work on top of a simple user input and do not require access to the product catalog. However some APIs (like visual search) operate on top of a client catalog. The first step is to upload the product catalog. These are some end points for uploading, accessing, modifying and deleting a product catalog.
 
-## Product JSON Format
+We use the term **catalog** to refer to a collection of product jsons. A product json consists of any available product meta-data and info about the product images.
 
-> Sample json document for catalog ingestion corresponding to this [product](http://www.abof.com/product/109FA16AWWWDR9D03Y10-109F-Women-Brown-&-Yellow-Printed-Dress).
+## Product JSON format
+
+> Sample product json document for catalog ingestion.
 
 ```json
 {
  "id": "109FA16AWWWDR9D03Y10", 
+ "gender": "female",  
+ "name": "109f women brown & yellow printed dress", 
  "url": "http://www.abof.com/product/109FA16AWWWDR9D03Y10-109F-Women-Brown-&-Yellow-Printed-Dress", 
  "date": "2016-10-12", 
  "out_of_stock": "no",
- "name": "109f women brown & yellow printed dress", 
  "category": "dress", 
- "visual_search_category": ["dress"],
  "taxonomy": "women;dress", 
- "gender": "female",  
  "age_group": [
   "teenager", 
   "adult"
@@ -91,39 +92,39 @@ The APIs come in two flavors. Some APIs are simple and do not require access to 
  "price": 2199.0, 
  "sale_price": 1100.0, 
  "sale_percentage": 50.0,
- "currency": "INR"
+ "currency": "INR",
+ "visual_search_category": ["dress"],
+ "visual_browse_category": ["dress"]
 }
 ```
 
+We refer to any **apparel**, **accessory**, or **footwear** as a **product** in the table below. A product in a catalog is represented as a json object with fields specified below. Ingesting the catalog means uploading these json files for all products in the catalog via an API call.
 
-We refer to any **apparel**, **accessory**, or **shoes** as a **product** in the table below. A product in a catalog is represented as a json object with fields specified below. Ingesting the catalog means uploading these json files for all products in the catalog via an API call.
-
-Try to populate as much information available for each product into these fields in the json document. Except for the fields in bold (**id**, **gender**, **name** (for natural language search), **images**(for visual search and visual browse)) all of these are optional. However the the performance of the natural language search is heavily dependent on the richness of these structured fields and is recommended that you provide as much information as possible.
+Try to populate as much information available for each product into these fields in the json document. Except for the fields in bold (**id**, **gender**, **name** (for natural language search), **images**(for visual search and visual browse)) all other fields are optional. However the performance of the natural language search is heavily dependent on the richness of these structured fields and is recommended that you provide as much information as possible.
 
 field | type | description 
 --------- | ------- | ---------- 
 **id** | string | A unique identifier for the product for which there is a product page and a set of product images associated with it. 
-url | string | The corresponding url of the product page.
-date | string | The date when the item was entered into the catalog, in `YYYY-MM-DD` format.
-out_of_stock | string | Can either be `yes` or `no`. This is the field that need to be changed to `yes` when a product goes out of stock. By default all search queries will not return out-of-stock products. Note that typically out of stock is at the SKU level. Ideally make this `yes`  only when all SKUs for this product are out of stock.
-| | | *You will typically use this when the product will be replenished. If you think the product will be discontinued and not available again you can delete that product entirely.*
+**gender** | string | The gender for which the product is intended for, can be `male`, `female` or `unisex`. Use `UNK` if not known.
 **name** | string | The name of the product. This is generally a free text brief description of the product.
+url | string | The corresponding url of the product page.
+date | string | The date when the item was entered into the catalog, in `YYYY-MM-DD` format. You can also include time, like, `2015-01-01T12:10:30Z`. 
+out_of_stock | string | Can either be `yes` or `no`. This is the field that need to be changed to `yes` when a product goes out of stock. By default all search queries will not return out-of-stock products. Note that typically out of stock is at the SKU level. Ideally make this `yes`  only when all SKUs for this product are out of stock. You will typically use this when the product will be replenished. If you think the product will be discontinued and not available again you can delete that product entirely.
 category | string | The product category.
-visual_search_category | list string |  A list of categories(or buckets) this product belongs to. This field is used to support category based visual search. A separate visual search index will be built with images from a particular category. While in most cases this will be same as `category` field in principle this field can be differnet. For example, `shirts` could be the `category` while the `visual_search_category` could be `women shirts`. The field can also support multiple category values. For example, `data['visual_search_category'] = ['tops','blouses']`. This means that the images corresponding to this product will be included in the visual search index for both `tops` and `blouses`.
-taxonomy | string | The complete product taxonomy if known, separated via `;`.
-**gender** | string | The gender for which the product is intended for, can be `male`, `female` or `unisex`.
+taxonomy | string | The complete product taxonomy separated via `;`.
 age_group | list string | The age group for which the product is intended for. Some suggested tags : `baby`, `kid`, `teenager`, `adult`.
 **images** | list of dict | A list of images available for the product with `image_id` as the key and the following fields in the dict. 
-| | image_id | The image id (string).
-| | image_url | The image url. The actual image will be downloaded from this url to build the visual search index. The image format can be in JPEG,PNG,BMP, or GIF.
-| | ignore | You can use this field to select what kind of images should be used for visual browse/search.  If `yes` then the image will not be downloaded and excluded from visual browse/search. In the example on the right, we ignore all images which have close-up of some details in the product.
-| | model_worn | If `yes` then the image corresponds to the model wearing the particular product. If `no` refers to image of the the product only. Use `UNK` if not known.
-| | pose | Refers to the pose/orientation in which the image is taken. Can take one of the following values: `front`, `back`, `left`, `right`, `top`, `UNK`.
-| | camera_focus | Which part of the model the camera is focussed on. Can take one of the following values: `full` (complete view of the model, entire body), `top` (upper part of the model above the waist, used in shirts etc.), `bottom` (lower part of the model below the waist, used in trousers etc.), `portrait` (model face, normally up to the shoulder), `detail` (a close-up of some details in the product), `outfit` (complete view of the model, entire body along with other apparel and accessories), `UNK`.
-| | image_type | Can be either `primary` or `secondary`. You can use this field also to categorize images.
-| | | *The fields `ignore`,`model_worn`, `pose`, `camera_focus`, and `image_type` are optional.*
-color | list of string | A list of colors terms that describe the colors in the product.
-pattern | list of string | A list of pattern terms that describe the pattern on the fabric.
+|  | **image_id** | The image id (string).
+|  | **image_url**  | The image url. The actual image will be automatically downloaded from this url. The image format can be in JPEG,PNG,BMP, or GIF. Note that this url should be publicly accessible for us to download the image.
+|  | image_filename | You can optionally specify an image filename. The image will be downloaded to the specified image filename.
+|  | image_type | Can be either `primary` or `secondary`. You can use this field also to categorize images.
+|  | ignore | You can use this field to select what kind of images should be used for visual browse/search. If `yes` then the image will not be downloaded and excluded from visual browse/search. In the example on the right, we ignore all images which have close-up of some details in the product.
+|  | model_worn  | If `yes` then the image corresponds to the model wearing the particular product. If `no` refers to image of the the product only. Use `UNK` if not known.
+|  | pose | Refers to the pose/orientation in which the image is taken. Can take one of the following values: `front`, `back`, `left`, `right`, `top`, `UNK`.
+|  | camera_focus | Which part of the model the camera is focused on. Can take one of the following values: `full` (complete view of the model, entire body), `top` (upper part of the model above the waist, used in shirts etc.), `bottom` (lower part of the model below the waist, used in trousers etc.), `portrait` (model face, normally up to the shoulder), `detail` (a close-up of some details in the product), `outfit` (complete view of the model, entire body along with other apparel and accessories), `UNK`.
+| | | *The fields `image_filename`,`image_type`,`ignore`,`model_worn`, `pose`, and `camera_focus` are optional.*
+color | list of string | A list of terms that describe the colors in the product.
+pattern | list of string | A list of terms that describe the pattern on the fabric.
 fabric | list of string | A list of terms that describe the fabric used in the product.
 brand | list of string | A list of terms that describe the brand name of the product.
 occasion | list of string | A list of terms that describe occasion for which this product can be worn.
@@ -134,10 +135,12 @@ style_tip | string | A detailed free text style tip if available. Typically this
 available_sizes | list of string | A list of available sizes for the product.
 price | float | The regular list price of the product.
 sale_price | float | The sale price of the product if the product is on sale. If the product is not on sale make this equal to the regular price.
-|  | |*Note that the natural language search by default will use the sale_price field  for the queries that deal with price.*
+|  | |*Note that the natural language search by default will use the sale_price field for the queries that deal with price.*
 sale_percentage | float | The sale percentage. This is useful for queries related to sale percentages.
 currency | string | The currency used, specified as a 3 letter [ISO 4217](http://www.xe.com/iso4217.php) currency code.
-|  | |*The catalog can have products in different currencies, and we will normalize the price internally for serving the query results.* (Not yet available)
+|  | | *The following two fields below are for category based visual search and visual browse. For more details refer to the Visual Search API.*
+visual_search_category | list of string |  A list of categories (or buckets) this product belongs to. This field is used to support category based visual search. 
+visual_browse_category | list of string |  A list of categories (or buckets) this product belongs to. This field is used to support category based visual browse.  
 
 ## Add product to a catalog    
 
